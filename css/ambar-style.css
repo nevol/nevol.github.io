@@ -1,0 +1,225 @@
+@font-face {
+  font-family: "ploni";
+  font-weight: 400;
+  font-style: normal;
+  src: url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-regular-aaa.woff2") format("woff2"),
+    url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-regular-aaa.woff") format("woff");
+}
+@font-face {
+  font-family: "ploni";
+  font-weight: 700;
+  font-style: normal;
+  src: url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-bold-aaa.woff2") format("woff2"),
+    url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-bold-aaa.woff") format("woff");
+}
+@font-face {
+  font-family: "ploni";
+  font-weight: 900;
+  font-style: normal;
+  src: url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-black-aaa.woff2") format("woff2"),
+    url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-black-aaa.woff") format("woff");
+}
+@font-face {
+  font-family: "ploni";
+  font-weight: 500;
+  font-style: normal;
+  src: url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-demibold-aaa.woff2") format("woff2"),
+    url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-demibold-aaa.woff") format("woff");
+}
+@font-face {
+  font-family: "ploni";
+  font-weight: 300;
+  font-style: normal;
+  src: url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-light-aaa.woff2") format("woff2"),
+    url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-light-aaa.woff") format("woff");
+}
+@font-face {
+  font-family: "ploni";
+  font-weight: 200;
+  font-style: normal;
+  src: url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-ultralight-aaa.woff2") format("woff2"),
+    url("https://ozglobalb2b.com/wp-content/themes/blankslate/fonts/webfont_ploni/ploni-ultralight-aaa.woff") format("woff");
+}
+
+body {
+  font-family: "ploni", sans-serif;
+  margin: 0;
+  color: #0f0156;
+  font-size: 18px;
+  direction: rtl;
+  padding: 20px;
+}
+
+/* Center all titles */
+h1,
+h2 {
+  text-align: center;
+  color:#0f0156;
+}
+
+.preview {
+  direction: rtl;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 40px;
+  background: #ffffff;
+  border-radius: 5px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.preview-con {
+  direction: rtl;
+  background: #ffffff;
+  display: block;
+  max-width: 700px;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0px 11px 29px -7px rgba(0, 0, 0, 0.23);
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Input styles */
+input {
+  min-width: 600px;
+  font-family: ploni;
+  height: 35px;
+  padding: 5px;
+  margin: 10px;
+  display: block;
+  border: none;
+  background: #f9f9f9;
+  outline: none;
+}
+
+.input-field {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 600px;
+  background: #f9f9f9;
+  direction: rtl;
+  text-align: right;
+}
+
+button {
+  font-family: ploni;
+  font-weight: bold;
+  direction: rtl;
+  margin-top: 20px;
+  padding: 15px 25px;
+  border: none;
+  border-radius: 80px;
+  color: #0f0156;
+  background-color: #abc735;
+  transition-duration: 0.3s;
+}
+
+button:hover {
+  background-color: #bfdb49;
+}
+
+.btn-less
+ {
+  font-family: ploni;
+  font-weight: bold;
+  direction: rtl;
+  margin-top: 20px;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 80px;
+  border: solid 1px #000;
+  background-color: #ffffff;
+  transition-duration: 0.3s;
+}
+
+.btn-less:hover {
+  background-color: #f5f5f5;
+}
+
+.btn-less-green{
+  color: #0f0156;
+  font-family: ploni;
+  font-weight: bold;
+  direction: rtl;
+  margin-top: 20px;
+  padding: 15px 25px;
+  border: none;
+  border-radius: 80px;
+  background-color: #efefef;
+  transition-duration: 0.3s;
+}
+
+.btn-less-green:hover {
+  background-color: #e3e3e3;
+}
+.button-container {
+  text-align: center; /* Center buttons within the container */
+  margin-top: 20px; /* Add space above the buttons */
+}
+
+.button-container .btn {
+  margin: 0 10px; /* Add horizontal space between buttons */
+}
+
+
+.quick-btns{
+  margin-top: 40px;
+}
+
+.quick-btns .btn{
+  margin: 0 10px; /* Add horizontal space between buttons */
+}
+
+#error-message{
+  margin-top :15px;
+}
+
+
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .preview-con {
+    padding: 30px;
+  }
+
+  input {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+
+  h1,
+  h2 {
+    font-size: 1.5em;
+  }
+
+  .preview {
+    padding: 10px;
+    margin-top: 20px;
+  }
+
+  .preview-con {
+    padding: 20px;
+  }
+
+  input {
+    height: 30px;
+    padding: 5px;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px 0;
+  }
+}

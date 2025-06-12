@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>יוצר חתימות אמבר</title>
+    <link rel="stylesheet" href="https://ozglobalb2b.com/signatures/gens/css/ambar-style.css">
+    <script src="https://ozglobalb2b.com/signatures/gens/js/ambar.js?version=1"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="center-align">מחולל חתימת מייל</h1>
+
+    <div class="preview-con">
+        <div class="input-field">
+            <input type="text" id="fullName" placeholder="הזן את שמך המלא" oninput="updatePreview()" required>
+        </div>
+
+        <div class="input-field">
+            <input type="text" id="jobTitle" placeholder="הזן את תפקידך" oninput="updatePreview()" required>
+        </div>
+
+        <div class="input-field">
+            <input type="text" id="phone" placeholder="טלפון" oninput="updatePreview()" required>
+        </div>
+
+        <div class="input-field">
+            <input type="text" id="mobile" placeholder="נייד" oninput="updatePreview()" required>
+        </div>
+
+        <div class="input-field">
+            <input type="text" id="fileName" placeholder="שם הקובץ להורדה" oninput="updatePreview()">
+        </div>
+
+        <div class="quick-btns">
+            <button class="btn" onclick="copyToClipboard()">העתק ללוח</button>
+            <button class="btn-less-green btn" onclick="downloadSignature()">הורד חתימה</button>
+        </div>
+    </div>
+
+    <div id="error-message" style="display: none;">חובה למלא את כל הסעיפים</div>
+
+    <h2 class="center-align">תצוגה מוקדמת:</h2>
+    <div class="preview" id="signaturePreview"></div>
+    
+    <div class="button-container">
+        <button class="btn-less" onclick="openPreviewInNewPage()">תצוגה בעמוד חדש</button>
+    </div>
+</div>
+
+</body>
+</html>

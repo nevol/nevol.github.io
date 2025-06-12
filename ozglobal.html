@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OZ Global Email Generator</title>
+    <link rel="stylesheet" href="https://ozglobalb2b.com/signatures/gens/css/ozglobal-style.css">
+    <script src="https://ozglobalb2b.com/signatures/gens/js/ozglobal.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="center-align">OZ Global Email Generator</h1>
+
+    <div class="preview-con">
+        <div class="input-field">
+            <input type="text" id="fullName" placeholder="Full name" oninput="updatePreview()" required>
+        </div>
+
+        <div class="input-field">
+            <input type="text" id="jobTitle" placeholder="Job description" oninput="updatePreview()" required>
+        </div>
+
+        <div class="input-field">
+            <input type="tel" id="phone" placeholder="Office phone number" oninput="this.value = this.value.replace(/[^0-9+\-()]/g, ''); updatePreview()">
+        </div>
+
+        <div class="input-field">
+            <input type="tel" id="mobile" placeholder="Mobile phone number" oninput="this.value = this.value.replace(/[^0-9+\-()]/g, ''); updatePreview()">
+        </div>
+
+        <div class="input-field">
+            <input type="text" id="fileName" placeholder="Name for file" oninput="updatePreview()">
+        </div>
+
+        <div class="input-field">
+            <select id="bannerSelection" onchange="updatePreview()">
+                <option value="base">Base</option>
+                <option value="digital">Digital</option>
+                <option value="creative">Creative</option>
+                <option value="strategy">Strategy</option>
+            </select>
+        </div>
+
+        <div class="quick-btns">
+            <button class="btn" onclick="copyToClipboard()">Copy to clipboard</button>
+            <button class="btn-less-green btn" onclick="downloadSignature()">Download HTML file</button>
+        </div>
+    </div>
+
+    <div id="error-message" style="display: none;">All inputs are required</div>
+
+    <h2 class="center-align">Quick Preview:</h2>
+    <div class="preview" id="signaturePreview"></div>
+    
+    <div class="button-container">
+        <button class="btn-less" onclick="openPreviewInNewPage()">Open in new window</button>
+    </div>
+</div>
+
+    <div class="version">
+        <p class="ver">V1.2</p>
+    </div>
+
+</body>
+</html>
