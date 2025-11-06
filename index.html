@@ -77,10 +77,22 @@
     .tab{padding:6px 12px;border-radius:999px;border:1px solid transparent;color:#d1d5db;white-space:nowrap;cursor:pointer}
     .tab.active{background:#1f2937;border-color:#38bdf8;color:white}
 
+    .chip{background:var(--chip-bg);border:1px solid var(--border);border-radius:999px;padding:6px 10px;cursor:pointer}
+    .chip.active{outline:2px solid var(--accent)}
+    #peopleChips{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+
     .lock-pill{font-size:12px;padding:2px 6px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.05)}
+    .admin-bar{position:fixed;left:16px;top:16px;z-index:10001;display:flex;gap:8px}
   </style>
 </head>
 <body>
+  <!-- admin button -->
+  <div class="admin-bar">
+    <button id="adminBtn" class="icon-btn" title="פאנל ניהול">
+      ⚙️
+    </button>
+  </div>
+
   <div class="app">
     <header class="header">
       <div>
@@ -131,7 +143,7 @@
           </div>
         </div>
         <div class="bd">
-          <div id="peopleChips" style="display:flex;gap:6px;margin-bottom:10px"></div>
+          <div id="peopleChips"></div>
           <div id="daysGrid" class="days" style="margin-bottom:10px"></div>
           <p style="color:var(--muted);font-size:12px">טפיחה על יום מחליפה מצב: זמין → מעדיף שלא → לא זמין → זמין.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -162,6 +174,30 @@
     </div>
   </div>
 
+  <!-- admin modal -->
+  <div id="adminBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>ניהול חדר</h2>
+      <p>רק מנהל יכול לשנות את זה.</p>
+      <div style="margin-bottom:8px">
+        <label>תאריך התחלה</label>
+        <input id="adminStartDate" type="date" style="width:100%;margin-top:4px;background:var(--chip-bg);border:1px solid var(--border);border-radius:10px;padding:8px">
+      </div>
+      <div style="margin-bottom:8px">
+        <label>טווח חישוב (בשבועות)</label>
+        <input id="adminHorizon" type="number" min="1" max="6" value="4" style="width:100%;margin-top:4px;background:var(--chip-bg);border:1px solid var(--border);border-radius:10px;padding:8px">
+      </div>
+      <div style="margin-bottom:8px">
+        <label>נעול עד (ריק = לא נעול)</label>
+        <input id="adminLockUntil" type="date" style="width:100%;margin-top:4px;background:var(--chip-bg);border:1px solid var(--border);border-radius:10px;padding:8px">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button id="adminCloseBtn" class="ghost">סגור</button>
+        <button id="adminSaveBtn">שמור</button>
+      </div>
+    </div>
+  </div>
+
   <!-- toasts -->
   <div id="toastWrap" class="toast-wrap" aria-live="polite"></div>
 
@@ -170,44 +206,54 @@
     import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-    // ===== Firebase config (שלך) =====
+    // ===== Firebase config (חדש) =====
     const firebaseConfig = {
-      apiKey: "AIzaSyCQ9xt6u1mr9cHGHWVJnVXlJY5wy9noL-4",
-      authDomain: "time-d77ad.firebaseapp.com",
-      projectId: "time-d77ad",
-      storageBucket: "time-d77ad.firebasestorage.app",
-      messagingSenderId: "174419203695",
-      appId: "1:174419203695:web:ab7eb33b68b4de2cab5f9a",
-      measurementId: "G-DGN4GHV5JD"
+      apiKey: "AIzaSyBiZIHRpbg0bq4VFZ2kDDXj6QeRJZpjOpg",
+      authDomain: "sadna-timetable.firebaseapp.com",
+      projectId: "sadna-timetable",
+      storageBucket: "sadna-timetable.firebasestorage.app",
+      messagingSenderId: "605203492621",
+      appId: "1:605203492621:web:7ed83f0e5e64d67b9c8a44",
+      measurementId: "G-8941L7ZZJ6"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
 
-    // ===== Constants & globals =====
-    const DEFAULT_GROUPS = [
-      "חדר מדפסות",
-      "חדר לייזר",
-      "CNC חדר",
-      "חדר צבע",
-      "חדר הרכבה",
-      "חדר אלקטרוניקה",
-      "תמיכה / כללי"
+    // ===== החדרים והאנשים שנתת =====
+    const DEFAULT_GROUPS = {
+      "מדפסות": { name: "מדפסות", people: ["נבו","נטע","טל"], horizonWeeks: 4 },
+      "תפירה": { name: "תפירה", people: ["כליל","עמית","שירה"], horizonWeeks: 4 },
+      "מתכת": { name: "מתכת", people: ["מאי"], horizonWeeks: 4 },
+      "עיבוד שבבים": { name: "עיבוד שבבים", people: ["ליעד"], horizonWeeks: 4 },
+      "עץ": { name: "עץ", people: ["אורי"], horizonWeeks: 4 }
+    };
+
+    // נעשה גם משתמשים דיפולטיים
+    const DEFAULT_USERS = [
+      { id: "u-navo", name: "נבו", group: "מדפסות", role: "admin" },
+      { id: "u-neta", name: "נטע", group: "מדפסות", role: "user" },
+      { id: "u-tal",  name: "טל",  group: "מדפסות", role: "user" },
+
+      { id: "u-klil", name: "כליל", group: "תפירה", role: "user" },
+      { id: "u-amit", name: "עמית", group: "תפירה", role: "user" },
+      { id: "u-shira",name: "שירה", group: "תפירה", role: "user" },
+
+      { id: "u-mai",  name: "מאי", group: "מתכת", role: "user" },
+      { id: "u-liad", name: "ליעד", group: "עיבוד שבבים", role: "user" },
+      { id: "u-uri",  name: "אורי", group: "עץ", role: "user" },
     ];
 
+    // ===== Globals =====
     const MS_DAY = 86400000;
     const hebDaysLong=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
-    const hebDays=["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
     const MIN_PER_PERSON = 2;
 
-    let activeUser = null;           // {id,name,group,role,people:[]?}
+    let activeUser = null;           // {id,name,group,role}
     let currentGroupId = null;       // string
-    let currentGroupData = null;     // {startDate,horizonWeeks,...}
+    let currentGroupData = null;     // {startDate,horizonWeeks,lockedUntil,people:[]}
     let state = Object.create(null); // constraints for group+month
-    let startDate = startOfDay(new Date());
-    let endDate   = calcEndByWeeks(startDate, 4);
-    let monthKey  = monthKeyFrom(startDate);
     let peopleInGroup = [];          // array of names defined for group
     let unsubConstraints = null;
 
@@ -234,8 +280,15 @@
     const identityStartBtn = document.getElementById("identityStartBtn");
     const scheduleTitle = document.getElementById("scheduleTitle");
     const lockBadge = document.getElementById("lockBadge");
+    const adminBtn = document.getElementById("adminBtn");
+    const adminBackdrop = document.getElementById("adminBackdrop");
+    const adminStartDate = document.getElementById("adminStartDate");
+    const adminHorizon = document.getElementById("adminHorizon");
+    const adminLockUntil = document.getElementById("adminLockUntil");
+    const adminSaveBtn = document.getElementById("adminSaveBtn");
+    const adminCloseBtn = document.getElementById("adminCloseBtn");
 
-    // ===== theme init =====
+    // ===== Theme init =====
     const savedTheme = localStorage.getItem("scheduler_theme");
     if(savedTheme){ document.documentElement.setAttribute("data-theme", savedTheme); }
     renderThemeIcon();
@@ -253,8 +306,17 @@
         : `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
     }
 
-    // ===== utils =====
-    function toast(msg, type="ok"){
+    // ===== Utils =====
+    function startOfDay(d){ const c=new Date(d); c.setHours(0,0,0,0); return c; }
+    function addDays(d,n){ return new Date(startOfDay(d).getTime() + n*MS_DAY); }
+    function prevSunday(d){ let x=startOfDay(d); while(x.getDay()!==0){ x=addDays(x,-1);} return x; }
+    function fmtDateKey(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${dd}`; }
+    function fmtDM(d){ const dd=String(d.getDate()).padStart(2,"0"), mm=String(d.getMonth()+1).padStart(2,"0"); return `${dd}.${mm}`; }
+    function rangeDays(d0,d1){ const out=[]; let t=d0.getTime(), t1=d1.getTime(); for(;t<=t1;t+=MS_DAY) out.push(new Date(t)); return out; }
+    function shiftForWeekday(jsDow){ if(jsDow>=0 && jsDow<=4) return {label:"16:00–22:00"}; if(jsDow===5) return {label:"08:00–14:00"}; return null; }
+    function weekIndexFor(date, startDate){ let s = prevSunday(startDate); return Math.floor((startOfDay(date) - s) / (7*MS_DAY)); }
+
+    function toast(msg,type="ok"){
       const el = document.createElement("div");
       el.className = "toast " + type;
       el.innerHTML = `<div>${msg}</div><div class="t-actions"><button class="btn">סגור</button></div>`;
@@ -263,27 +325,39 @@
       el.querySelector(".btn").onclick = close;
       setTimeout(close, 3500);
     }
-    function startOfDay(d){ const c=new Date(d); c.setHours(0,0,0,0); return c; }
-    function addDays(d,n){ return new Date(startOfDay(d).getTime() + n*MS_DAY); }
-    function prevSunday(d){ let x=startOfDay(d); while(x.getDay()!==0){ x=addDays(x,-1);} return x; }
-    function calcEndByWeeks(start, weeks){
-      const sunday = prevSunday(start);
-      return addDays(sunday, weeks*7 - 1); // למשל 4 שבועות → 27 ימים
-    }
-    function fmtDateKey(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${dd}`; }
-    function fmtDM(d){ const dd = String(d.getDate()).padStart(2,"0"), mm=String(d.getMonth()+1).padStart(2,"0"); return `${dd}.${mm}`; }
-    function rangeDays(d0,d1){ const out=[]; let t=d0.getTime(), t1=d1.getTime(); for(;t<=t1;t+=MS_DAY) out.push(new Date(t)); return out; }
-    function shiftForWeekday(jsDow){ if(jsDow>=0 && jsDow<=4) return {label:"16:00–22:00"}; if(jsDow===5) return {label:"08:00–14:00"}; return null; }
-    function weekIndexFor(date){ let s = prevSunday(startDate); return Math.floor((startOfDay(date) - s) / (7*MS_DAY)); }
-    function monthKeyFrom(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"); return `${y}-${m}`; }
 
-    // ===== firebase helpers =====
+    // ===== Firestore helpers =====
+    async function bootstrapIfEmpty(){
+      // users
+      const userSnap = await getDocs(collection(db,"users"));
+      if(userSnap.empty){
+        await Promise.all(DEFAULT_USERS.map(u=> setDoc(doc(db,"users",u.id),{
+          name:u.name, group:u.group, role:u.role
+        }, {merge:true})));
+      }
+      // groups
+      const groupSnap = await getDocs(collection(db,"groups"));
+      if(groupSnap.empty){
+        const writes = [];
+        for(const [id,g] of Object.entries(DEFAULT_GROUPS)){
+          writes.push(setDoc(doc(db,"groups",id),{
+            name:g.name,
+            people:g.people,
+            startDate: new Date().toISOString().slice(0,10),
+            horizonWeeks: g.horizonWeeks,
+            lockedUntil: ""
+          },{merge:true}));
+        }
+        await Promise.all(writes);
+      }
+    }
+
     async function loadAllUsers(){
       const snap = await getDocs(collection(db, "users"));
       const arr = [];
       snap.forEach(d => arr.push({ id:d.id, ...d.data() }));
       window.__ALL_USERS__ = arr;
-      identitySelect.innerHTML = arr.map(u=> `<option value="${u.id}">${u.name} (${u.group})</option>`).join("");
+      identitySelect.innerHTML = arr.map(u=> `<option value="${u.id}">${u.name} (${u.group})${u.role==="admin"?" · מנהל":""}</option>`).join("");
       return arr;
     }
 
@@ -291,10 +365,12 @@
       const gRef = doc(db, "groups", groupId);
       const gSnap = await getDoc(gRef);
       if(!gSnap.exists()){
+        const def = DEFAULT_GROUPS[groupId] || {name:groupId,people:[],horizonWeeks:4};
         await setDoc(gRef, {
-          name: groupId,
+          name: def.name,
+          people: def.people,
           startDate: new Date().toISOString().slice(0,10),
-          horizonWeeks: 4,
+          horizonWeeks: def.horizonWeeks,
           lockedUntil: ""
         }, { merge:true });
         return (await getDoc(gRef)).data();
@@ -303,53 +379,55 @@
     }
 
     async function loadConstraintsForGroup(groupId, gData){
-      // נחשב תאריכים לפי החדר
+      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
       const weeks = gData?.horizonWeeks || 4;
-      startDate = startOfDay(new Date(gData?.startDate || new Date()));
-      endDate   = calcEndByWeeks(startDate, weeks);
-      monthKey  = monthKeyFrom(startDate);
-      renderDateBadge();
-
+      const endDate = addDays(startDate, weeks*7 - 1);
+      const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,"0")}`;
       state = Object.create(null);
-
       const q = collection(db, "groups", groupId, "constraints", monthKey, "days");
       const snap = await getDocs(q);
       snap.forEach(d => state[d.id] = d.data());
 
-      // האזנה חיה
-      if(unsubConstraints) unsubConstraints();
-      unsubConstraints = onSnapshot(q, (ss) => {
-        ss.docChanges().forEach(ch => {
+      if(unsubConstraints){ unsubConstraints(); unsubConstraints=null; }
+      unsubConstraints = onSnapshot(q, (ss)=>{
+        ss.docChanges().forEach(ch=>{
           if(!state[ch.doc.id]) state[ch.doc.id]={};
           Object.assign(state[ch.doc.id], ch.doc.data());
         });
         renderCalendar();
-        const p = computeSchedule();
-        renderSchedule(p);
-        renderSummary(p);
+        const pack = computeSchedule();
+        renderSchedule(pack);
+        renderSummary(pack);
       });
+
+      renderDateBadge(startDate, endDate);
     }
 
     async function saveConstraints(){
-      if(!activeUser) { toast("בחר משתמש קודם.", "warn"); return; }
-      if(isBoardLockedForUser()) { toast("הלוח נעול עד תאריך הנעילה.", "warn"); return; }
+      if(!activeUser){ toast("בחר משתמש קודם.", "warn"); return; }
+      if(isBoardLockedForUser()){ toast("הלוח נעול.", "warn"); return; }
       try{
+        const gData = currentGroupData;
+        const startDate = startOfDay(new Date(gData?.startDate || new Date()));
+        const weeks = gData?.horizonWeeks || 4;
+        const endDate = addDays(startDate, weeks*7 - 1);
+        const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,"0")}`;
         const writes = [];
         for(const [dateKey,val] of Object.entries(state)){
           const clean = {};
-          for(const p of peopleInGroup){
-            if(val[p] !== undefined) clean[p] = Number(val[p]) || 0;
-          }
-          writes.push(
-            setDoc(doc(db, "groups", currentGroupId, "constraints", monthKey, "days", dateKey), clean, {merge:true})
-          );
+          for(const p of peopleInGroup){ if(val[p]!==undefined) clean[p]=Number(val[p])||0; }
+          writes.push(setDoc(doc(db, "groups", currentGroupId, "constraints", monthKey, "days", dateKey), clean, {merge:true}));
         }
         await Promise.all(writes);
-        toast("נשמר בהצלחה.", "ok");
+        toast("נשמר בהצלחה.","ok");
       }catch(err){ console.error(err); toast("שמירה נכשלה: " + err.message, "bad"); }
     }
 
     async function resetConstraints(){
+      if(!activeUser){ toast("בחר משתמש קודם.","warn"); return; }
+      const gData = currentGroupData;
+      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
+      const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,"0")}`;
       const q = collection(db, "groups", currentGroupId, "constraints", monthKey, "days");
       const snap = await getDocs(q);
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
@@ -358,21 +436,23 @@
       const p = computeSchedule(); renderSchedule(p); renderSummary(p);
     }
 
-    // ===== renderers =====
-    function renderDateBadge(){
+    // ===== Renderers =====
+    function renderDateBadge(startDate, endDate){
       dateRangeBadge.textContent = `${fmtDM(startDate)} – ${fmtDM(endDate)}`;
     }
 
     function renderPeopleChips(){
       peopleChips.innerHTML = peopleInGroup.map(name => {
         const active = (activeUser && activeUser.name === name);
-        return `<button class="chip ${active?"active":""}" data-person="${name}" style="background:${active?"#0f172a":"var(--chip-bg)"};border:1px solid var(--border);border-radius:999px;padding:6px 10px">${name}</button>`;
+        return `<button class="chip ${active?"active":""}" data-person="${name}">${name}</button>`;
       }).join("");
-      peopleChips.querySelectorAll("button").forEach(btn=>{
+      peopleChips.querySelectorAll(".chip").forEach(btn=>{
         btn.addEventListener("click", ()=> {
           if(!activeUser) return;
+          // רק המשתמש עצמו או אדמין יכול לבחור
           if(activeUser.name !== btn.dataset.person && activeUser.role !== "admin") return;
-          activeUser.name = btn.dataset.person; // רק לצורך הצביעה
+          activeUser = { ...activeUser, name: btn.dataset.person };
+          whoamiEl.textContent = `אתה: ${activeUser.name} (${activeUser.group})${activeUser.role==="admin"?" · מנהל":""}`;
           renderPeopleChips();
           renderCalendar();
         });
@@ -380,6 +460,11 @@
     }
 
     function renderCalendar(){
+      const gData = currentGroupData;
+      if(!gData) return;
+      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
+      const weeks = gData?.horizonWeeks || 4;
+      const endDate = addDays(startDate, weeks*7 - 1);
       const days = rangeDays(startDate, endDate);
       let html = "";
       for(const d of days){
@@ -387,10 +472,9 @@
         const jsDow = d.getDay();
         const sh = shiftForWeekday(jsDow);
         const cur = state[key] || {};
-        const isShabbat = jsDow===6;
         const val = activeUser ? Number(cur[activeUser.name] ?? 0) : 0;
         html += `
-          <div class="day ${isShabbat?"shabbat":""} state-${val}" data-key="${key}">
+          <div class="day ${jsDow===6?"shabbat":""} state-${val}" data-key="${key}">
             <div>${hebDaysLong[jsDow]}, ${fmtDM(d)}</div>
             <div style="color:var(--muted);font-size:12px">${sh?sh.label:"—"}</div>
           </div>
@@ -398,14 +482,13 @@
       }
       daysGrid.innerHTML = html;
 
-      // click
       daysGrid.querySelectorAll(".day").forEach(el=>{
         const key = el.dataset.key;
         const jsDow = new Date(key).getDay();
         if(jsDow===6) return;
         el.addEventListener("click", ()=>{
           if(!activeUser){ toast("בחר משתמש קודם.", "warn"); return; }
-          if(isBoardLockedForUser()){ toast("הלוח נעול עד לתאריך שנקבע.", "warn"); return; }
+          if(isBoardLockedForUser()){ toast("הלוח נעול.", "warn"); return; }
           const row = state[key] || {};
           const old = Number(row[activeUser.name] ?? 0);
           const next = (old + 1) % 3;
@@ -418,7 +501,13 @@
     }
 
     function renderSchedule(pack){
-      const { assign } = pack;
+      const gData = currentGroupData;
+      if(!gData){ scheduleGrid.innerHTML=""; return; }
+      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
+      const weeks = gData?.horizonWeeks || 4;
+      const endDate = addDays(startDate, weeks*7 - 1);
+
+      const assign = pack.assign;
       let html = `
         <div></div>
         <div class="col-hd">א׳</div>
@@ -429,8 +518,8 @@
         <div class="col-hd">ו׳</div>
       `;
       let weekStart = prevSunday(startDate);
-      let guard = 0;
-      while(weekStart <= endDate && guard++ < 80){
+      let guard=0;
+      while(weekStart <= endDate && guard++<80){
         const weekEnd = addDays(weekStart,6);
         const rowLabel = `${fmtDM(weekStart)} – ${fmtDM(weekEnd)}`;
         html += `<div style="display:flex;align-items:center">${rowLabel}</div>`;
@@ -444,18 +533,16 @@
           }else{
             const who = assign[key] || null;
             const row = state[key] || {};
-            const absent = peopleInGroup.filter(p=> Number(row[p] ?? 0) === 2);
-            const prefer = peopleInGroup.filter(p=> Number(row[p] ?? 0) === 1);
+            const absent = peopleInGroup.filter(p => Number(row[p]??0)===2);
+            const prefer = peopleInGroup.filter(p => Number(row[p]??0)===1);
             const isFriday = cur.getDay()===5;
             html += `
-              <div class="slot ${isFriday?"fri":""}">
+              <div class="slot ${isFriday?'fri':''}">
                 <div class="datebox">
                   <div class="d-top">${hebDaysLong[cur.getDay()]}, ${fmtDM(cur)}</div>
                   <div class="d-time">${sh.label}</div>
                 </div>
-                <div class="${who ? 'pill ok':'pill bad'}">
-                  ${who ? `משובץ: <b>${who}</b>` : '❌ אין משובץ'}
-                </div>
+                <div class="${who ? 'pill ok':'pill bad'}">${who ? `משובץ: <b>${who}</b>` : '❌ אין משובץ'}</div>
                 ${prefer.length ? `<div class="pill warn">מעדיפים שלא: ${prefer.join(", ")}</div>` : ``}
                 ${absent.length ? `<div class="pill bad">לא זמינים: ${absent.join(", ")}</div>` : ``}
               </div>
@@ -498,28 +585,34 @@
       summaryBox.innerHTML = html;
     }
 
-    // ===== canAssign helper =====
+    // ===== Logic =====
     function canAssign(person, dateKey){
       const row = state[dateKey] || {};
       return Number(row[person] ?? 0) !== 2;
     }
 
-    // ===== computeSchedule (כמעט כמו שלך) =====
     function computeSchedule(){
+      const gData = currentGroupData;
+      if(!gData) return {assign:{},weekCounts:[],fridayCounts:{},totalCounts:{}};
+      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
+      const weeks = gData?.horizonWeeks || 4;
+      const endDate = addDays(startDate, weeks*7 - 1);
       const days = rangeDays(startDate, endDate);
+
       const assign = {};
       const totalCounts  = Object.fromEntries(peopleInGroup.map(p=>[p,0]));
       const fridayCounts = Object.fromEntries(peopleInGroup.map(p=>[p,0]));
       const weekCounts   = [];
-      const ensureWeek = (idx)=> { if(!weekCounts[idx]) weekCounts[idx] = Object.fromEntries(peopleInGroup.map(p=>[p,0])); };
+
       const prefVal = (dayKey, person)=> Number((state[dayKey] || {})[person] ?? 0);
       const hasOtherZero = (dayKey, exceptPerson)=>{
         const row = state[dayKey] || {};
-        return peopleInGroup.some(p=> p!==exceptPerson && Number(row[p] ?? 0) === 0);
+        return peopleInGroup.some(p => p !== exceptPerson && Number(row[p] ?? 0) === 0);
       };
       const isFridayKey = (k)=> new Date(k).getDay()===5;
+      const ensureWeek = (idx)=>{ if(!weekCounts[idx]) weekCounts[idx] = Object.fromEntries(peopleInGroup.map(p=>[p,0])); };
 
-      // גרידי ראשוני
+      // שלב 1: גרידי
       for(const d of days){
         const jsDow = d.getDay();
         const sh = shiftForWeekday(jsDow);
@@ -528,15 +621,14 @@
         const row = state[key] || {};
         const available0 = peopleInGroup.filter(p => Number(row[p] ?? 0) === 0);
         const prefer1    = peopleInGroup.filter(p => Number(row[p] ?? 0) === 1);
-        const wIdx = weekIndexFor(d); ensureWeek(wIdx);
-
+        const wIdx = weekIndexFor(d, startDate); ensureWeek(wIdx);
         let candidates = [];
         if(available0.length) candidates = available0.slice();
         else if(prefer1.length) candidates = prefer1.slice();
 
         if(candidates.length){
           candidates.sort((a,b)=>{
-            if(jsDow === 5){
+            if(jsDow===5){
               if(fridayCounts[a] !== fridayCounts[b]) return fridayCounts[a] - fridayCounts[b];
             }
             if(weekCounts[wIdx][a] !== weekCounts[wIdx][b]) return weekCounts[wIdx][a] - weekCounts[wIdx][b];
@@ -551,21 +643,22 @@
         }
       }
 
-      // מקבצים לפי שבוע
+      // קבוצת מפת שבוע -> ימים
       const allKeys = Object.keys(assign);
       const keysByWeek = {};
       for(const k of allKeys){
-        const wIdx = weekIndexFor(new Date(k)); ensureWeek(wIdx);
+        const wIdx = weekIndexFor(new Date(k), startDate); ensureWeek(wIdx);
         (keysByWeek[wIdx] ||= []).push(k);
       }
 
-      // שלב 2 – הבטחת 2 לשבוע
+      // שלב 2: לפחות 2 בשבוע
       for(const wIdxStr of Object.keys(keysByWeek)){
         const wIdx = Number(wIdxStr);
         const weekKeys = keysByWeek[wIdx];
 
         for(const person of peopleInGroup){
           while((weekCounts[wIdx][person] || 0) < MIN_PER_PERSON){
+            // קודם נסה יום ריק
             const empty = weekKeys.find(k => !assign[k] && canAssign(person,k));
             if(empty){
               const pref = prefVal(empty, person);
@@ -578,10 +671,10 @@
               }
             }
 
+            // אין יום ריק – לקחת מתורם
             const donors = peopleInGroup
               .filter(p => p !== person && (weekCounts[wIdx][p]||0) > MIN_PER_PERSON)
               .sort((a,b)=> (weekCounts[wIdx][b]||0) - (weekCounts[wIdx][a]||0));
-
             let moved = false;
             for(const donor of donors){
               const bucket1 = weekKeys.filter(k => assign[k]===donor && !isFridayKey(k));
@@ -610,8 +703,8 @@
         }
       }
 
-      // שלב 3 – איזון שישי
-      let guard=0;
+      // שלב 3: איזון שישי
+      let guard = 0;
       while(guard++ < 40){
         let maxP = peopleInGroup[0], minP = peopleInGroup[0];
         for(const p of peopleInGroup){
@@ -624,7 +717,7 @@
         let balanced = false;
 
         for(const fk of fridayKeysOfMax){
-          const wf = weekIndexFor(new Date(fk));
+          const wf = weekIndexFor(new Date(fk), startDate);
           const prefMin = prefVal(fk, minP);
           if(!canAssign(minP, fk)) continue;
           if(prefMin === 1 && hasOtherZero(fk, minP)) continue;
@@ -641,7 +734,7 @@
 
           const minWeekdays = allKeys.filter(k => assign[k]===minP && !isFridayKey(k));
           for(const day2 of minWeekdays){
-            const w2 = weekIndexFor(new Date(day2));
+            const w2 = weekIndexFor(new Date(day2), startDate);
             if(!canAssign(maxP, day2)) continue;
             const prefMaxDay2 = prefVal(day2, maxP);
             if(prefMaxDay2 === 1 && hasOtherZero(day2, maxP)) continue;
@@ -671,6 +764,10 @@
 
     // ===== ICS / CSV / Share =====
     function exportCSV(pack){
+      const gData = currentGroupData;
+      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
+      const weeks = gData?.horizonWeeks || 4;
+      const endDate = addDays(startDate, weeks*7 - 1);
       const { assign } = pack;
       const days = rangeDays(startDate, endDate);
       const rows = [["תאריך","יום","משמרת","משובץ"]];
@@ -678,23 +775,28 @@
         const sh = shiftForWeekday(d.getDay());
         if(!sh) continue;
         const key = fmtDateKey(d);
-        rows.push([fmtDM(d), hebDaysLong[d.getDay()], sh.label, assign[key] || ""]);
+        rows.push([fmtDM(d), hebDaysLong[d.getDay()], sh.label, assign[key]||""]);
       }
       const csv = rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\r\n");
       const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = `schedule_${currentGroupId}.csv`;
       a.click();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 200);
+      setTimeout(()=>URL.revokeObjectURL(a.href), 300);
+      toast("CSV הופק והורד.","ok");
     }
     function pad(n){ return String(n).padStart(2,"0"); }
-    function toICSDateUTC(d,h,m){
-      const z = new Date(d); z.setUTCHours(h,m,0,0);
+    function toICSDateUTC(d, h, m){
+      const z = new Date(d); z.setUTCHours(h, m, 0, 0);
       return `${z.getUTCFullYear()}${pad(z.getUTCMonth()+1)}${pad(z.getUTCDate())}T${pad(z.getUTCHours())}${pad(z.getUTCMinutes())}00Z`;
     }
     function downloadICSForMe(assign){
-      if(!activeUser){ toast("בחר משתמש קודם.", "warn"); return; }
+      if(!activeUser){ toast("בחר משתמש קודם.","warn"); return; }
+      const gData = currentGroupData;
+      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
+      const weeks = gData?.horizonWeeks || 4;
+      const endDate = addDays(startDate, weeks*7 - 1);
       const days = rangeDays(startDate, endDate);
       let ics = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -716,16 +818,18 @@ DTSTART:${toICSDateUTC(d,st[0],st[1])}
 DTEND:${toICSDateUTC(d,en[0],en[1])}
 SUMMARY:משמרת – ${activeUser.name}
 DESCRIPTION:חדר ${currentGroupId}
+LOCATION:סדנה
 END:VEVENT
 `;
       }
       ics += "END:VCALENDAR";
       const blob = new Blob([ics], {type:"text/calendar;charset=utf-8"});
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = `schedule_${currentGroupId}_${activeUser.name}.ics`;
       a.click();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 200);
+      setTimeout(()=>URL.revokeObjectURL(a.href), 300);
+      toast("קובץ iCalendar נוצר.","ok");
     }
 
     // ===== lock helper =====
@@ -738,54 +842,51 @@ END:VEVENT
       return new Date() < lockDate;
     }
 
-    // ===== bottom tabs =====
+    // ===== tabs =====
     function renderTabs(selectedId){
-      bottomTabs.innerHTML = DEFAULT_GROUPS.map(g => {
+      bottomTabs.innerHTML = Object.keys(DEFAULT_GROUPS).map(g => {
         const active = g === selectedId;
         return `<div class="tab ${active?"active":""}" data-group="${g}">${g}</div>`;
       }).join("");
       bottomTabs.querySelectorAll(".tab").forEach(tab=>{
         tab.addEventListener("click", async ()=>{
           const g = tab.dataset.group;
-          // אם לא אדמין ולא שייך לחדר הזה → מצב צפייה בלבד
           currentGroupId = g;
-          await switchGroup(g, {forceView:true});
+          await switchGroup(g);
         });
       });
     }
 
-    // ===== switching group =====
-    async function switchGroup(groupId, opts={}){
+    async function switchGroup(groupId){
       const gData = await ensureGroupDoc(groupId);
       currentGroupData = gData;
       scheduleTitle.textContent = "לוח שיבוצים – " + (gData.name || groupId);
       lockBadge.style.display = isBoardLockedForUser() ? "inline-flex" : "none";
 
-      // אנשים בחדר – אתה אמרת שלכל חדר יש אנשים אחרים.
-      // נעשה פשוט: אם יש בשדות החדר people=[...] – נשתמש. אחרת ניקח את כל המשתמשים ששייכים אליו.
+      // מי האנשים בחדר
       let groupPeople = gData.people;
       if(!groupPeople || !Array.isArray(groupPeople) || !groupPeople.length){
         const all = window.__ALL_USERS__ || [];
-        groupPeople = all.filter(u => u.group === groupId).map(u => u.name);
+        groupPeople = all.filter(u=>u.group===groupId).map(u=>u.name);
       }
       peopleInGroup = groupPeople || [];
+
       renderPeopleChips();
-
       await loadConstraintsForGroup(groupId, gData);
-
       const pack = computeSchedule();
       renderSchedule(pack);
       renderSummary(pack);
       renderTabs(groupId);
+
+      // תעדכן גם במודל ניהול
+      adminStartDate.value = gData.startDate || new Date().toISOString().slice(0,10);
+      adminHorizon.value = gData.horizonWeeks || 4;
+      adminLockUntil.value = gData.lockedUntil || "";
     }
 
     // ===== identity modal handlers =====
-    function showIdentityModal(){
-      identityBackdrop.style.display = "flex";
-    }
-    function hideIdentityModal(){
-      identityBackdrop.style.display = "none";
-    }
+    function showIdentityModal(){ identityBackdrop.style.display = "flex"; }
+    function hideIdentityModal(){ identityBackdrop.style.display = "none"; }
 
     identityStartBtn.addEventListener("click", async ()=>{
       const pickedId = identitySelect.value;
@@ -795,35 +896,52 @@ END:VEVENT
         toast("לא מצאתי משתמש כזה.", "bad");
         return;
       }
-      try{
-        activeUser = user;
-        currentGroupId = user.group;
-        localStorage.setItem("scheduler_user_id", user.id);
-        localStorage.setItem("scheduler_group_id", user.group);
+      activeUser = user;
+      currentGroupId = user.group;
+      localStorage.setItem("scheduler_user_id", user.id);
+      localStorage.setItem("scheduler_group_id", user.group);
 
-        await switchGroup(user.group);
-        whoamiEl.textContent = `אתה: ${user.name} (${user.group})${user.role==="admin"?" · מנהל":""}`;
-        hideIdentityModal();
-        toast("מחובר כ: " + user.name, "ok");
-      }catch(err){
-        console.error(err);
-        toast("שגיאה בטעינת החדר: " + err.message, "bad");
-        hideIdentityModal();
+      await switchGroup(user.group);
+      whoamiEl.textContent = `אתה: ${user.name} (${user.group})${user.role==="admin"?" · מנהל":""}`;
+      hideIdentityModal();
+      toast("מחובר כ: " + user.name, "ok");
+    });
+
+    // ===== admin modal =====
+    adminBtn.addEventListener("click", ()=>{
+      if(!activeUser || activeUser.role!=="admin"){
+        toast("רק מנהל יכול לפתוח את זה.","warn");
+        return;
       }
+      adminBackdrop.style.display="flex";
+    });
+    adminCloseBtn.addEventListener("click", ()=>{ adminBackdrop.style.display="none"; });
+    adminSaveBtn.addEventListener("click", async ()=>{
+      if(!activeUser || activeUser.role!=="admin"){ return; }
+      const payload = {
+        startDate: adminStartDate.value || new Date().toISOString().slice(0,10),
+        horizonWeeks: Number(adminHorizon.value)||4,
+        lockedUntil: adminLockUntil.value || ""
+      };
+      await setDoc(doc(db,"groups",currentGroupId), payload, {merge:true});
+      currentGroupData = { ...(currentGroupData||{}), ...payload };
+      adminBackdrop.style.display="none";
+      await switchGroup(currentGroupId);
+      toast("ההגדרות נשמרו.","ok");
     });
 
     // ===== buttons =====
     saveBtn.addEventListener("click", saveConstraints);
     resetMineBtn.addEventListener("click", resetConstraints);
-    computeBtn.addEventListener("click", ()=>{ const p=computeSchedule(); renderSchedule(p); renderSummary(p); });
-    exportBtn.addEventListener("click", ()=>{ const p=computeSchedule(); exportCSV(p); });
+    computeBtn.addEventListener("click", ()=>{ const pack = computeSchedule(); renderSchedule(pack); renderSummary(pack); toast("שובץ מחדש.","ok"); });
+    exportBtn.addEventListener("click", ()=>{ const pack = computeSchedule(); exportCSV(pack); });
     shareBtn.addEventListener("click", ()=>{
       const u = new URL(location.href);
       u.searchParams.set("view","1");
       u.searchParams.set("group", currentGroupId);
       window.open(u.toString(), "_blank");
     });
-    addCalendarBtn.addEventListener("click", ()=>{ const p=computeSchedule(); downloadICSForMe(p.assign); });
+    addCalendarBtn.addEventListener("click", ()=>{ const pack = computeSchedule(); downloadICSForMe(pack.assign); });
     switchUserBtn.addEventListener("click", async ()=>{
       await signOut(auth);
       activeUser = null;
@@ -834,9 +952,8 @@ END:VEVENT
     // ===== auth init =====
     onAuthStateChanged(auth, async (user)=>{
       if(user){
-        // נטען את המשתמשים
+        await bootstrapIfEmpty();
         await loadAllUsers();
-        // ננסה לשחזר מה-localStorage
         const savedUserId = localStorage.getItem("scheduler_user_id");
         const savedGroupId = localStorage.getItem("scheduler_group_id");
         const usersArr = window.__ALL_USERS__ || [];
@@ -847,7 +964,7 @@ END:VEVENT
           whoamiEl.textContent = `אתה: ${activeUser.name} (${activeUser.group})${activeUser.role==="admin"?" · מנהל":""}`;
           await switchGroup(currentGroupId);
         }else{
-          renderTabs(DEFAULT_GROUPS[0]);
+          renderTabs(Object.keys(DEFAULT_GROUPS)[0]);
           showIdentityModal();
         }
       }else{
@@ -856,9 +973,9 @@ END:VEVENT
     });
 
     // ===== initial =====
-    renderTabs(DEFAULT_GROUPS[0]);
-    renderDateBadge();
-
+    renderTabs(Object.keys(DEFAULT_GROUPS)[0]);
+    // schedule placeholder
+    scheduleGrid.innerHTML = `<div class="slot"><div class="datebox">טוען...</div></div>`;
   </script>
 </body>
 </html>
