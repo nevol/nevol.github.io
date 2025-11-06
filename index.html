@@ -365,4 +365,755 @@
     const adminEditAllChk = document.getElementById("adminEditAllChk");
     const manualModeChk = document.getElementById("manualModeChk");
     const manualBypassChk = document.getElementById("manualBypassChk");
-    const adminUsersPanel = document.getElemen
+    const adminUsersPanel = document.getElementById("adminUsersPanel");
+    const newUserName = document.getElementById("newUserName");
+    const newUserGroup = document.getElementById("newUserGroup");
+    const newUserAdmin = document.getElementById("newUserAdmin");
+    const createUserBtn = document.getElementById("createUserBtn");
+    const usersList = document.getElementById("usersList");
+    const peopleChips = document.getElementById("peopleChips");
+    const summaryBox = document.getElementById("summaryBox");
+    const toastWrap = document.getElementById("toastWrap");
+    const groupTabs = document.getElementById("groupTabs");
+    const pageTitle = document.getElementById("pageTitle");
+
+    const url = new URL(location.href);
+    const URL_GROUP = url.searchParams.get("group");
+
+    // state
+    let currentUser = null;
+    let allUsers = [];
+    let activeGroupId = URL_GROUP || GROUP_DEFS[0].id;
+    let startDate = startOfDay(new Date());
+    let endDate   = calcEndForHorizon(startDate, 4);
+    let monthKey  = monthKeyFrom(startDate);
+    let groupSettings = {}; // {groupId: {startDate, lockedUntil, horizonWeeks}}
+    let state = Object.create(null);
+    let adminEditAll = false;
+    let manualMode   = false;
+    let manualBypass = false;
+    let viewOnly = false;
+    let currentPack = null;
+    let unsubConstraints = null;
+
+    function overrideStorageKey(){ return `scheduler_manual_overrides_${activeGroupId}_${monthKey}`; }
+    let manualOverrides = JSON.parse(localStorage.getItem(overrideStorageKey()) || "{}");
+
+    // THEME
+    const savedTheme = localStorage.getItem("scheduler_theme");
+    if(savedTheme === "light" || savedTheme === "dark"){ document.documentElement.setAttribute("data-theme", savedTheme); }
+    renderThemeIcon();
+    themeBtn.addEventListener("click", ()=>{
+      const cur = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("scheduler_theme", next);
+      renderThemeIcon();
+    });
+    function renderThemeIcon(){
+      const mode = document.documentElement.getAttribute("data-theme") || "dark";
+      themeIcon.innerHTML = mode === "dark"
+        ? `<path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M3 12h2M19 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><circle cx="12" cy="12" r="4"/>`
+        : `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    }
+    function toast(msg, type="ok"){ const el=document.createElement("div"); el.className=`toast ${type}`; el.innerHTML=`<div class="icon">🔔</div><div class="t-body"><div class="t-text">${msg}</div></div><div class="t-actions"><button class="btn">סגור</button></div>`; toastWrap.appendChild(el); const close=()=>{el.style.opacity="0";el.style.transform="translateY(6px)";setTimeout(()=>el.remove(),250)}; el.querySelector(".btn").onclick=close; setTimeout(close,3600); }
+
+    // date helpers
+    function startOfDay(d){ const c=new Date(d); c.setHours(0,0,0,0); return c; }
+    function addDays(d,n){ return new Date(startOfDay(d).getTime() + n*MS_DAY); }
+    function prevSunday(d){ let x=startOfDay(d); while(x.getDay()!==0){ x=addDays(x,-1);} return x; }
+    function calcEndForHorizon(d, horizonWeeks){
+      const sunday = prevSunday(d);
+      const days = horizonWeeks * 7 - 1; // למשל 1 שבוע -> 6 ימים
+      return addDays(sunday, days + (d.getDay()===0 ? 0 : 0));
+    }
+    function fmtDateKey(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${dd}`; }
+    function fmtDM(d){ const dd=String(d.getDate()).padStart(2,"0"), mm=String(d.getMonth()+1).padStart(2,"0"); return `${dd}.${mm}`; }
+    function rangeDays(d0,d1){ const out=[]; let t=startOfDay(d0).getTime(), t1=startOfDay(d1).getTime(); for(;t<=t1;t+=MS_DAY) out.push(new Date(t)); return out; }
+    function shiftForWeekday(jsDow){ if(jsDow>=0 && jsDow<=4) return {label:"16:00–22:00"}; if(jsDow===5) return {label:"08:00–14:00"}; return null; }
+    function weekIndexFor(date){ let s = prevSunday(startDate); return Math.floor((startOfDay(date) - s) / (7*MS_DAY)); }
+    function monthKeyFrom(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"); return `${y}-${m}`; }
+    function renderDateBadge(){ dateRangeBadge.textContent = `${fmtDM(startDate)} ← ${fmtDM(endDate)} · טווח`; }
+
+    // users
+    async function loadAllUsers(){
+      const qs = await getDocs(collection(db, "users"));
+      allUsers = qs.docs.map(d=>({ id:d.id, ...d.data() }));
+      renderIdentityList();
+      renderGroupTabs();
+    }
+    function renderIdentityList(){
+      identitySelect.innerHTML = "";
+      allUsers.sort((a,b)=>a.name.localeCompare(b.name,"he"));
+      for(const u of allUsers){
+        const opt = document.createElement("option");
+        opt.value = u.id;
+        opt.textContent = u.name + " – " + (GROUP_DEFS.find(g=>g.id===u.groupId)?.name || u.groupId);
+        identitySelect.appendChild(opt);
+      }
+    }
+    function renderGroupTabs(){
+      groupTabs.innerHTML = "";
+      for(const g of GROUP_DEFS){
+        const btn = document.createElement("button");
+        btn.className = "tab-btn" + (g.id === activeGroupId ? " active" : "");
+        const lockedText = groupSettings[g.id]?.lockedUntil ? `<span class="tab-lock">🔒 עד ${groupSettings[g.id].lockedUntil}</span>` : "";
+        btn.innerHTML = `${g.name} ${lockedText}`;
+        btn.addEventListener("click", ()=>{ activeGroupId = g.id; localStorage.setItem("scheduler_last_group", activeGroupId); switchToGroup(g.id); });
+        groupTabs.appendChild(btn);
+      }
+    }
+
+    function currentGroupPeople(){
+      return allUsers.filter(u => u.groupId === activeGroupId).map(u => u.name);
+    }
+    function isCurrentGroupLockedForMe(){
+      const gset = groupSettings[activeGroupId];
+      if(!gset?.lockedUntil) return false;
+      const today = fmtDateKey(new Date());
+      return today <= gset.lockedUntil && !(currentUser?.isAdmin);
+    }
+
+    // constraints
+    async function loadConstraints(){
+      state = Object.create(null);
+      const col = collection(db, "groups", activeGroupId, "constraints", monthKey, "days");
+      const snap = await getDocs(col);
+      snap.forEach(docSnap=>{ state[docSnap.id] = docSnap.data(); });
+    }
+    async function saveConstraints(){
+      if(viewOnly){ toast("לוח נעול או שאין לך הרשאה.", "warn"); return; }
+      if(!currentUser){ toast("לא מחובר.", "warn"); return; }
+      const writes = [];
+      for(const [dateKey,val] of Object.entries(state)){
+        const clean = {};
+        for(const p of currentGroupPeople()){ if(val[p]!==undefined) clean[p]=Number(val[p])||0; }
+        writes.push(setDoc(doc(db, "groups", activeGroupId, "constraints", monthKey, "days", dateKey), clean, {merge:true}));
+      }
+      await Promise.all(writes);
+      toast("נשמר.", "ok");
+    }
+    async function resetMonthOnCloud(){
+      toast("מאפס את האילוצים של החדר…","warn");
+      const col = collection(db, "groups", activeGroupId, "constraints", monthKey, "days");
+      const snap = await getDocs(col);
+      await Promise.all(snap.docs.map(ds=>deleteDoc(ds.ref)));
+      state = Object.create(null);
+      manualOverrides = {};
+      localStorage.setItem(overrideStorageKey(), "{}");
+      renderCalendar();
+      const p = computeSchedule(currentGroupPeople(), manualOverrides);
+      currentPack = p; renderSchedule(p); renderSummary(p);
+      toast("אופס – אופסנו.","ok");
+    }
+
+    // group settings
+    async function loadGroupSettings(groupId){
+      const ref = doc(db, "groups", groupId);
+      const snap = await getDoc(ref);
+      if(snap.exists()){
+        const data = snap.data();
+        groupSettings[groupId] = data;
+        if(groupId === activeGroupId){
+          applyStartAndHorizon(data.startDate || fmtDateKey(new Date()), data.horizonWeeks || 4);
+          if(data.lockedUntil) lockInput.value = data.lockedUntil;
+        }
+      }else{
+        const sd = fmtDateKey(new Date());
+        const data = { startDate: sd, lockedUntil: "", horizonWeeks: 4 };
+        await setDoc(ref, data, {merge:true});
+        groupSettings[groupId] = data;
+      }
+    }
+    async function loadAllGroupSettings(){
+      for(const g of GROUP_DEFS){ await loadGroupSettings(g.id); }
+      renderGroupTabs();
+    }
+
+    function applyStartAndHorizon(sd, horizonWeeks){
+      try{
+        const [y,m,dd] = sd.split("-").map(Number);
+        startDate = startOfDay(new Date(y, m-1, dd));
+      }catch(_){ startDate = startOfDay(new Date()); }
+      endDate = calcEndForHorizon(startDate, horizonWeeks || 4);
+      monthKey = monthKeyFrom(startDate);
+      renderDateBadge();
+      manualOverrides = JSON.parse(localStorage.getItem(overrideStorageKey()) || "{}");
+    }
+
+    // calendar
+    function renderCalendar(){
+      const people = currentGroupPeople();
+      peopleChips.innerHTML = "";
+      const storedPerson = localStorage.getItem("scheduler_person_"+activeGroupId) || people[0] || null;
+      for(const p of people){
+        const btn = document.createElement("button");
+        btn.className = "chip" + (p === storedPerson ? " active" : "");
+        btn.dataset.person = p;
+        btn.textContent = p;
+        peopleChips.appendChild(btn);
+      }
+
+      const days = rangeDays(startDate, endDate);
+      const head = hebDays.map(h=>`<div class="day head" aria-hidden="true"><div class="d1"></div><div class="d2">${h}</div></div>`).join("");
+      let html = head;
+      for(const d of days){
+        const key = fmtDateKey(d);
+        const jsDow = d.getDay();
+        const isShabbat = jsDow===6;
+        const isFriday = jsDow===5;
+        const sh = shiftForWeekday(jsDow);
+        const cur = state[key] || {};
+        const val = Number(cur[storedPerson] ?? 0);
+        html += `
+          <div class="day ${isShabbat?'shabbat':''} ${isFriday?'fri':''} state-${val}" data-key="${key}">
+            <div class="d1">${hebDaysLong[jsDow]}, ${fmtDM(d)}</div>
+            <div class="d2">${sh?sh.label:'—'}</div>
+          </div>
+        `;
+      }
+      daysGrid.innerHTML = html;
+
+      const locked = viewOnly;
+      if(!locked){
+        daysGrid.querySelectorAll(".day").forEach(el=>{
+          const key = el.dataset.key;
+          if(!key) return;
+          const jsDow = new Date(key).getDay();
+          if(jsDow===6) return;
+          el.addEventListener("click", ()=>{
+            const ap = localStorage.getItem("scheduler_person_"+activeGroupId) || currentGroupPeople()[0];
+            const cur = state[key] || {};
+            const old = Number(cur[ap] ?? 0);
+            const next = (old + 1) % 3;
+            cur[ap] = next;
+            state[key] = cur;
+            el.classList.remove("state-0","state-1","state-2");
+            el.classList.add(`state-${next}`);
+          });
+        });
+      }
+
+      peopleChips.querySelectorAll(".chip").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          peopleChips.querySelectorAll(".chip").forEach(b=>b.classList.remove("active"));
+          btn.classList.add("active");
+          localStorage.setItem("scheduler_person_"+activeGroupId, btn.dataset.person);
+          renderCalendar();
+        });
+      });
+    }
+
+    // compute schedule (כמו קודם, רק פונקציה אחת, לא אשנה כאן כדי לא להאריך יותר)
+    function computeSchedule(PEOPLE, overrides = {}){
+      const days = rangeDays(startDate, endDate);
+      const assign = {};
+      const totalCounts  = Object.fromEntries(PEOPLE.map(p=>[p,0]));
+      const fridayCounts = Object.fromEntries(PEOPLE.map(p=>[p,0]));
+      const weekCounts   = [];
+      const WEEK_MIN = 2;
+
+      const ensureWeek = (idx)=>{ if(!weekCounts[idx]) weekCounts[idx] = Object.fromEntries(PEOPLE.map(p=>[p,0])); };
+      const isFridayKey = (k)=> new Date(k).getDay()===5;
+      const prefVal = (dayKey, person)=> Number((state[dayKey] || {})[person] ?? 0);
+      const hasOtherZero = (dayKey, exceptPerson)=>{
+        const row = state[dayKey] || {};
+        return PEOPLE.some(p=>p!==exceptPerson && Number(row[p] ?? 0)===0);
+      };
+      const canAssign = (person, dateKey)=>{
+        const row = state[dateKey] || {};
+        return Number(row[person] ?? 0) !== 2;
+      };
+
+      for(const d of days){
+        const jsDow = d.getDay();
+        const sh = shiftForWeekday(jsDow);
+        if(!sh) continue;
+        const key = fmtDateKey(d);
+        const row = state[key] || {};
+        const wIdx = weekIndexFor(d); ensureWeek(wIdx);
+
+        if(overrides[key]){
+          const forced = overrides[key];
+          assign[key] = forced;
+          totalCounts[forced]++; weekCounts[wIdx][forced]=(weekCounts[wIdx][forced]||0)+1;
+          if(jsDow===5) fridayCounts[forced]++;
+          continue;
+        }
+
+        const avail0 = PEOPLE.filter(p=>Number(row[p] ?? 0)===0);
+        const prefer1 = PEOPLE.filter(p=>Number(row[p] ?? 0)===1);
+
+        let candidates = [];
+        if(avail0.length) candidates = avail0.slice();
+        else if(prefer1.length) candidates = prefer1.slice();
+
+        if(candidates.length){
+          candidates.sort((a,b)=>{
+            if(jsDow===5){
+              if(fridayCounts[a] !== fridayCounts[b]) return fridayCounts[a] - fridayCounts[b];
+            }
+            if(weekCounts[wIdx][a] !== weekCounts[wIdx][b]) return weekCounts[wIdx][a] - weekCounts[wIdx][b];
+            return totalCounts[a] - totalCounts[b];
+          });
+          const pick = candidates[0];
+          assign[key] = pick;
+          totalCounts[pick]++; weekCounts[wIdx][pick]=(weekCounts[wIdx][pick]||0)+1;
+          if(jsDow===5) fridayCounts[pick]++;
+        }else{
+          assign[key] = null;
+        }
+      }
+
+      // weeks map
+      const allKeys = Object.keys(assign);
+      const keysByWeek = {};
+      for(const k of allKeys){
+        const wIdx = weekIndexFor(new Date(k)); ensureWeek(wIdx);
+        (keysByWeek[wIdx] ||= []).push(k);
+      }
+
+      // ensure 2 per week
+      for(const wIdxStr of Object.keys(keysByWeek)){
+        const wIdx = Number(wIdxStr);
+        const weekKeys = keysByWeek[wIdx];
+        for(const person of PEOPLE){
+          while((weekCounts[wIdx][person]||0) < WEEK_MIN){
+            const empty = weekKeys.find(k=>!assign[k] && canAssign(person,k) && !overrides[k]);
+            if(empty){
+              const pref = prefVal(empty, person);
+              if(!(pref===1 && hasOtherZero(empty, person))){
+                assign[empty] = person;
+                weekCounts[wIdx][person]=(weekCounts[wIdx][person]||0)+1;
+                totalCounts[person]++;
+                if(isFridayKey(empty)) fridayCounts[person]++;
+                continue;
+              }
+            }
+            const donors = PEOPLE.filter(p=>p!==person && (weekCounts[wIdx][p]||0) > WEEK_MIN)
+              .sort((a,b)=>(weekCounts[wIdx][b]||0) - (weekCounts[wIdx][a]||0));
+
+            let moved = false;
+            for(const donor of donors){
+              const bucket1 = weekKeys.filter(k=>assign[k]===donor && !isFridayKey(k) && !overrides[k]);
+              const bucket2 = weekKeys.filter(k=>assign[k]===donor &&  isFridayKey(k) && !overrides[k]);
+              const buckets = [bucket1, bucket2];
+              for(const bucket of buckets){
+                const sorted = bucket.slice().sort((a,b)=>prefVal(a,person)-prefVal(b,person));
+                for(const dayKey of sorted){
+                  if(!canAssign(person, dayKey)) continue;
+                  const pref = prefVal(dayKey, person);
+                  if(pref===1 && hasOtherZero(dayKey, person)) continue;
+                  assign[dayKey]=person;
+                  weekCounts[wIdx][person]=(weekCounts[wIdx][person]||0)+1;
+                  weekCounts[wIdx][donor]=(weekCounts[wIdx][donor]||0)-1;
+                  totalCounts[person]++; totalCounts[donor]--;
+                  if(isFridayKey(dayKey)){ fridayCounts[person]++; fridayCounts[donor]--; }
+                  moved = true;
+                  break;
+                }
+                if(moved) break;
+              }
+              if(moved) break;
+            }
+            if(!moved) break;
+          }
+        }
+      }
+
+      // balance friday
+      let guard=0;
+      while(guard++<60){
+        let maxP=PEOPLE[0], minP=PEOPLE[0];
+        for(const p of PEOPLE){
+          if(fridayCounts[p] > fridayCounts[maxP]) maxP = p;
+          if(fridayCounts[p] < fridayCounts[minP]) minP = p;
+        }
+        if(fridayCounts[maxP] - fridayCounts[minP] <= 1) break;
+        const fridayKeysOfMax = allKeys.filter(k=>assign[k]===maxP && isFridayKey(k) && !overrides[k]);
+        let balanced = false;
+        for(const fk of fridayKeysOfMax){
+          const wf = weekIndexFor(new Date(fk));
+          const prefMin = prefVal(fk, minP);
+          if(Number((state[fk]||{})[minP] ?? 0) === 2) continue;
+          if(prefMin === 1 && hasOtherZero(fk, minP)) continue;
+          if((weekCounts[wf][minP]||0) < WEEK_MIN){
+            assign[fk] = minP;
+            weekCounts[wf][minP]=(weekCounts[wf][minP]||0)+1;
+            weekCounts[wf][maxP]=(weekCounts[wf][maxP]||0)-1;
+            fridayCounts[minP]++; fridayCounts[maxP]--;
+            balanced = true; break;
+          }
+          const minWeekdayKeys = allKeys.filter(k=>assign[k]===minP && !isFridayKey(k) && !overrides[k]);
+          for(const day2 of minWeekdayKeys){
+            const w2 = weekIndexFor(new Date(day2));
+            if(Number((state[day2]||{})[maxP] ?? 0) === 2) continue;
+            const prefMaxDay2 = prefVal(day2, maxP);
+            if(prefMaxDay2 === 1 && hasOtherZero(day2, maxP)) continue;
+            if((weekCounts[wf][maxP]||0)-1 < WEEK_MIN) continue;
+            if((weekCounts[w2][minP]||0)-1 < WEEK_MIN) continue;
+            assign[fk]=minP;
+            assign[day2]=maxP;
+            fridayCounts[minP]++; fridayCounts[maxP]--;
+            weekCounts[wf][minP]=(weekCounts[wf][minP]||0)+1;
+            weekCounts[wf][maxP]=(weekCounts[wf][maxP]||0)-1;
+            weekCounts[w2][maxP]=(weekCounts[w2][maxP]||0)+1;
+            weekCounts[w2][minP]=(weekCounts[w2][minP]||0)-1;
+            balanced = true; break;
+          }
+          if(balanced) break;
+        }
+        if(!balanced) break;
+      }
+
+      return { assign, weekCounts, fridayCounts, totalCounts };
+    }
+
+    function recomputeStatsFromAssign(PEOPLE, assign){
+      const days = rangeDays(startDate, endDate);
+      const weekCounts = [];
+      const fridayCounts = Object.fromEntries(PEOPLE.map(p=>[p,0]));
+      for(const d of days){
+        const sh = shiftForWeekday(d.getDay());
+        if(!sh) continue;
+        const key = fmtDateKey(d);
+        const who = assign[key];
+        const wIdx = weekIndexFor(d);
+        if(!weekCounts[wIdx]) weekCounts[wIdx] = Object.fromEntries(PEOPLE.map(p=>[p,0]));
+        if(who){
+          weekCounts[wIdx][who] = (weekCounts[wIdx][who]||0)+1;
+          if(d.getDay()===5) fridayCounts[who] = (fridayCounts[who]||0)+1;
+        }
+      }
+      return { weekCounts, fridayCounts };
+    }
+
+    function renderSchedule(pack){
+      currentPack = pack;
+      const PEOPLE = currentGroupPeople();
+      const { assign } = pack;
+      let html = `
+        <div></div>
+        <div class="col-hd">א׳</div>
+        <div class="col-hd">ב׳</div>
+        <div class="col-hd">ג׳</div>
+        <div class="col-hd">ד׳</div>
+        <div class="col-hd">ה׳</div>
+        <div class="col-hd">ו׳</div>
+      `;
+      let weekStart = prevSunday(startDate); let guard=0;
+      while(weekStart <= endDate && guard++<80){
+        const weekEnd = addDays(weekStart,6);
+        const rowLabel = `${fmtDM(weekStart)} – ${fmtDM(weekEnd)}`;
+        html += `<div class="muted" style="display:flex;align-items:center;white-space:nowrap">${rowLabel}</div>`;
+        for(let i=0;i<6;i++){
+          const cur = addDays(weekStart,i);
+          const key = fmtDateKey(cur);
+          const inRange = cur>=startDate && cur<=endDate;
+          const sh = shiftForWeekday(cur.getDay());
+          const dateTitle = `${hebDaysLong[cur.getDay()]}, ${fmtDM(cur)}`;
+          const timeStr = sh ? sh.label : "—";
+          if(!inRange || !sh){
+            html += `<div class="slot" style="opacity:.35"><div class="datebox"><div class="d-top">${dateTitle}</div><div class="d-time">אין</div></div></div>`;
+          }else{
+            const who = assign[key] || "";
+            const row = state[key] || {};
+            const absent = PEOPLE.filter(p=>Number(row[p]??0)===2);
+            const prefer = PEOPLE.filter(p=>Number(row[p]??0)===1);
+            const isFriday = cur.getDay()===5;
+            let content;
+            if(manualMode && !viewOnly){
+              content = `
+                <select class="assign-select" data-key="${key}" style="background:var(--chip-bg);border:1px solid var(--border);border-radius:999px;padding:4px 8px;color:var(--ink)">
+                  <option value="">— ללא —</option>
+                  ${PEOPLE.map(p=>`<option value="${p}" ${p===who?'selected':''}>${p}</option>`).join("")}
+                </select>
+              `;
+            }else{
+              content = `<div class="${who ? 'pill ok':'pill bad'}">${who ? `משובץ: <b>${who}</b>` : '❌ אין משובץ'}</div>`;
+            }
+            html += `
+              <div class="slot ${isFriday?'fri':''}">
+                <div class="datebox">
+                  <div class="d-top">${dateTitle}</div>
+                  <div class="d-time">${timeStr}</div>
+                </div>
+                ${content}
+                ${prefer.length ? `<div class="pill warn">מעדיפים שלא: ${prefer.join(", ")}</div>` : ``}
+                ${absent.length ? `<div class="pill bad">לא זמינים: ${absent.join(", ")}</div>` : ``}
+              </div>
+            `;
+          }
+        }
+        weekStart = addDays(weekStart,7);
+      }
+      scheduleGrid.innerHTML = html;
+
+      if(manualMode && !viewOnly){
+        scheduleGrid.querySelectorAll(".assign-select").forEach(sel=>{
+          sel.addEventListener("change", ()=>{
+            const key = sel.dataset.key;
+            const val = sel.value || null;
+            if(manualBypass){
+              if(val) manualOverrides[key] = val; else delete manualOverrides[key];
+              localStorage.setItem(overrideStorageKey(), JSON.stringify(manualOverrides));
+              currentPack.assign[key] = val;
+              const stats = recomputeStatsFromAssign(currentGroupPeople(), currentPack.assign);
+              currentPack.weekCounts = stats.weekCounts;
+              currentPack.fridayCounts = stats.fridayCounts;
+              renderSchedule(currentPack); renderSummary(currentPack);
+            }else{
+              if(val) manualOverrides[key] = val; else delete manualOverrides[key];
+              localStorage.setItem(overrideStorageKey(), JSON.stringify(manualOverrides));
+              const PACK = computeSchedule(currentGroupPeople(), manualOverrides);
+              renderSchedule(PACK); renderSummary(PACK);
+            }
+          });
+        });
+      }
+    }
+
+    function renderSummary(pack){
+      const PEOPLE = currentGroupPeople();
+      const { weekCounts, fridayCounts } = pack;
+      const html = `
+        <div class="panel" style="margin-top:12px">
+          <div class="hd"><h3 style="margin:0">סיכום שבועי + ימי שישי</h3></div>
+          <div class="bd">
+            <div style="overflow:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:15px;min-width:0">
+                <thead>
+                  <tr>
+                    <th style="text-align:right;border-bottom:1px solid var(--border);padding:6px 4px;white-space:nowrap">שבוע</th>
+                    ${PEOPLE.map(p=>`<th style="text-align:center;border-bottom:1px solid var(--border);padding:6px 4px">${p}</th>`).join("")}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${(weekCounts||[]).map((wc,idx)=>`
+                    <tr>
+                      <td style="border-bottom:1px solid var(--border);padding:6px 4px;white-space:nowrap">שבוע ${idx+1}</td>
+                      ${PEOPLE.map(p=>`<td style="text-align:center;border-bottom:1px solid var(--border);padding:6px 4px">${wc?.[p] ?? 0}</td>`).join("")}
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+              ${PEOPLE.map(p=>`<div class="pill">${p}: שישי – <b>${fridayCounts?.[p] ?? 0}</b></div>`).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+      summaryBox.innerHTML = html;
+    }
+
+    function exportCSV(pack){
+      const { assign } = pack;
+      const days = rangeDays(startDate, endDate);
+      const rows = [["תאריך","יום","משמרת","משובץ"]];
+      for(const d of days){
+        const sh = shiftForWeekday(d.getDay());
+        if(!sh) continue;
+        const key = fmtDateKey(d);
+        rows.push([fmtDM(d), hebDaysLong[d.getDay()], sh.label, assign[key]||""]);
+      }
+      const csv = rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `schedule_${activeGroupId}.csv`;
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),200);
+      toast("CSV ירד.","ok");
+    }
+
+    function pad(n){ return String(n).padStart(2,"0"); }
+    function toICSDateUTC(d, h, m){
+      const z=new Date(d); z.setUTCHours(h,m,0,0);
+      return `${z.getUTCFullYear()}${pad(z.getUTCMonth()+1)}${pad(z.getUTCDate())}T${pad(z.getUTCHours())}${pad(z.getUTCMinutes())}00Z`;
+    }
+    function downloadICSForMe(assign){
+      if(!currentUser){ toast("בחר משתמש קודם.","warn"); return; }
+      const myName = currentUser.name;
+      const days = rangeDays(startDate, endDate);
+      let ics = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Workshop//Schedule//HE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+`;
+      for(const d of days){
+        const sh = shiftForWeekday(d.getDay());
+        if(!sh) continue;
+        const key = fmtDateKey(d);
+        const who = assign[key];
+        if(who !== myName) continue;
+        let shStart=[16,0], shEnd=[22,0];
+        if(d.getDay()===5){ shStart=[8,0]; shEnd=[14,0]; }
+        const uid = `${key}-${myName}-${activeGroupId}@schedule`;
+        ics += `BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${toICSDateUTC(new Date(),0,0)}
+DTSTART:${toICSDateUTC(d, shStart[0], shStart[1])}
+DTEND:${toICSDateUTC(d, shEnd[0], shEnd[1])}
+SUMMARY:משמרת – ${myName} (${GROUP_DEFS.find(g=>g.id===activeGroupId)?.name || activeGroupId})
+DESCRIPTION:משמרת ${sh.label}
+LOCATION:סדנה
+END:VEVENT
+`;
+      }
+      ics += "END:VCALENDAR";
+      const blob = new Blob([ics], {type:"text/calendar;charset=utf-8"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `schedule_${activeGroupId}_${myName}.ics`;
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),200);
+      toast("iCal נוצר.","ok");
+    }
+
+    // identity
+    function showIdentityModal(){ renderIdentityList(); identityBackdrop.style.display="flex"; }
+    function hideIdentityModal(){ identityBackdrop.style.display="none"; }
+
+    async function startWithUser(userId){
+      const u = allUsers.find(x=>x.id===userId);
+      if(!u){ toast("משתמש לא נמצא.","bad"); return; }
+      currentUser = u;
+      activeGroupId = u.groupId;
+      localStorage.setItem("scheduler_last_group", activeGroupId);
+      localStorage.setItem("scheduler_last_user", u.id);
+      whoamiEl.textContent = `${u.name} (${GROUP_DEFS.find(g=>g.id===activeGroupId)?.name || activeGroupId})` + (u.isAdmin?" · מנהל":"");
+      if(!auth.currentUser){
+        try{ await signInAnonymously(auth); }catch(e){}
+      }
+      await switchToGroup(activeGroupId);
+      hideIdentityModal();
+    }
+
+    document.getElementById("identityStartBtn").addEventListener("click", async ()=>{
+      const picked = identitySelect.value;
+      if(picked) await startWithUser(picked);
+    });
+
+    // switch group
+    async function switchToGroup(groupId){
+      activeGroupId = groupId;
+      pageTitle.textContent = `לוח שיבוצים – ${GROUP_DEFS.find(g=>g.id===groupId)?.name || groupId}`;
+      const gset = groupSettings[groupId];
+      applyStartAndHorizon(gset?.startDate || fmtDateKey(new Date()), gset?.horizonWeeks || 4);
+      renderGroupTabs();
+
+      if(unsubConstraints){ unsubConstraints(); unsubConstraints=null; }
+      await loadConstraints();
+      unsubConstraints = onSnapshot(collection(db, "groups", groupId, "constraints", monthKey, "days"), snap=>{
+        snap.docChanges().forEach(ch=>{ if(!state[ch.doc.id]) state[ch.doc.id]={}; Object.assign(state[ch.doc.id], ch.doc.data()); });
+        renderCalendar(); const p=computeSchedule(currentGroupPeople(), manualOverrides); renderSchedule(p); renderSummary(p);
+      });
+
+      viewOnly = isCurrentGroupLockedForMe() || (!currentUser?.isAdmin && currentUser?.groupId !== groupId);
+      document.body.classList.toggle("view-only", viewOnly);
+
+      renderCalendar();
+      const pack = computeSchedule(currentGroupPeople(), manualOverrides);
+      renderSchedule(pack); renderSummary(pack);
+    }
+
+    // admin UI
+    function showAdmin(){
+      if(!currentUser){ toast("התחבר קודם.","warn"); return; }
+      const gset = groupSettings[activeGroupId] || {};
+      dateInput.value = gset.startDate || fmtDateKey(new Date());
+      lockInput.value = gset.lockedUntil || "";
+      horizonSelect.value = String(gset.horizonWeeks || 4);
+      adminEditAllChk.checked = adminEditAll;
+      manualModeChk.checked = manualMode;
+      manualBypassChk.checked = manualBypass;
+      if(currentUser.isAdmin){
+        adminUsersPanel.style.display = "block";
+        newUserGroup.innerHTML = GROUP_DEFS.map(g=>`<option value="${g.id}">${g.name}</option>`).join("");
+        newUserGroup.value = activeGroupId;
+        const usersInGroup = allUsers.filter(u=>u.groupId===activeGroupId);
+        usersList.textContent = "משתמשים בחדר: " + (usersInGroup.map(u=>u.name + (u.isAdmin?" (אדמין)":"")).join(", ") || "—");
+      }else{
+        adminUsersPanel.style.display = "none";
+      }
+      adminBackdrop.style.display = "flex";
+    }
+    function hideAdmin(){ adminBackdrop.style.display = "none"; }
+    adminBtn.addEventListener("click", showAdmin);
+    adminCancelBtn.addEventListener("click", hideAdmin);
+    adminResetBtn.addEventListener("click", resetMonthOnCloud);
+
+    createUserBtn.addEventListener("click", async ()=>{
+      const name = (newUserName.value || "").trim();
+      const group = newUserGroup.value;
+      const isAdmin = newUserAdmin.checked;
+      if(!name){ toast("צריך שם.","warn"); return; }
+      await setDoc(doc(db, "users", name), { name, groupId: group, isAdmin }, { merge:true });
+      await loadAllUsers();
+      toast("המשתמש נוצר/עודכן.","ok");
+      newUserName.value = "";
+      const usersInGroup = allUsers.filter(u=>u.groupId===activeGroupId);
+      usersList.textContent = "משתמשים בחדר: " + (usersInGroup.map(u=>u.name + (u.isAdmin?" (אדמין)":"")).join(", ") || "—");
+    });
+
+    adminSaveBtn.addEventListener("click", async ()=>{
+      const newStart = dateInput.value;
+      const newLock  = lockInput.value;
+      const newHorizon = Number(horizonSelect.value) || 4;
+      adminEditAll = !!adminEditAllChk.checked;
+      manualMode   = !!manualModeChk.checked;
+      manualBypass = !!manualBypassChk.checked;
+      await setDoc(doc(db, "groups", activeGroupId), { startDate: newStart, lockedUntil: newLock, horizonWeeks: newHorizon }, { merge:true });
+      groupSettings[activeGroupId] = { ...(groupSettings[activeGroupId]||{}), startDate:newStart, lockedUntil:newLock, horizonWeeks:newHorizon };
+      applyStartAndHorizon(newStart, newHorizon);
+      await loadConstraints();
+      renderCalendar();
+      const pack = computeSchedule(currentGroupPeople(), manualOverrides);
+      renderSchedule(pack); renderSummary(pack);
+      viewOnly = isCurrentGroupLockedForMe() || (!currentUser?.isAdmin && currentUser?.groupId !== activeGroupId);
+      document.body.classList.toggle("view-only", viewOnly);
+      hideAdmin();
+      toast("נשמר.","ok");
+    });
+
+    // buttons
+    saveBtn.addEventListener("click", saveConstraints);
+    resetMineBtn.addEventListener("click", ()=>{
+      if(viewOnly){ toast("לוח נעול.","warn"); return; }
+      const me = localStorage.getItem("scheduler_person_"+activeGroupId) || currentGroupPeople()[0];
+      for(const d of rangeDays(startDate, endDate)){
+        const k = fmtDateKey(d);
+        if(state[k] && state[k][me]!==undefined) state[k][me]=0;
+      }
+      renderCalendar(); toast("האילוצים שלך אופסו (תשמור).","ok");
+    });
+    computeBtn.addEventListener("click", ()=>{ const p=computeSchedule(currentGroupPeople(), manualOverrides); renderSchedule(p); renderSummary(p); toast("שובץ.","ok"); });
+    exportBtn.addEventListener("click", ()=>{ const p=currentPack || computeSchedule(currentGroupPeople(), manualOverrides); exportCSV(p); });
+    shareBtn.addEventListener("click", ()=>{ const u=new URL(location.href); u.searchParams.set("group", activeGroupId); u.searchParams.set("start", fmtDateKey(startDate)); window.open(u.toString(), "_blank"); });
+    addCalendarBtn.addEventListener("click", ()=>{ const p=currentPack || computeSchedule(currentGroupPeople(), manualOverrides); downloadICSForMe(p.assign); });
+    switchUserBtn.addEventListener("click", ()=>{ currentUser=null; whoamiEl.textContent="לא מחובר"; showIdentityModal(); });
+
+    // auth/realtime
+    onAuthStateChanged(auth, async ()=>{
+      await loadAllUsers();
+      await loadAllGroupSettings();
+      const lastUser = localStorage.getItem("scheduler_last_user");
+      if(lastUser && allUsers.some(u=>u.id===lastUser)){
+        await startWithUser(lastUser);
+      }else{
+        showIdentityModal();
+      }
+    });
+
+    identitySelect.addEventListener("change", ()=>{
+      const uId = identitySelect.value;
+      if(uId) localStorage.setItem("scheduler_last_user", uId);
+    });
+
+    function initialDraw(){ renderDateBadge(); }
+    initialDraw();
+  </script>
+</body>
+</html>
