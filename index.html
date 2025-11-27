@@ -3,210 +3,239 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>לוח שיבוצים</title>
+  <title>לוח שיבוצים - מתוקן</title>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0f172a; --card:#111827; --ink:#e5e7eb; --muted:#9aa6b2;
-      --border:#273244; --accent:#38bdf8; --accent2:#22d3ee;
-      --chip-bg:#0b1222; --pill-bg:#122; --btn-ink:#06121c;
-      --ok-bg:#032015; --ok-br:#0c3; --ok-ink:#b7f7cf;
-      --warn-bg:#231e07; --warn-br:#54450a; --warn-ink:#fde68a;
-      --bad-bg:#2b0a0a; --bad-br:#521; --bad-ink:#fecaca;
-      --fri-bg:#0a1d2b; --fri-br:#224055;
-      --toast-bg: rgba(15,23,42,.9); --toast-br:#2b3a55; --toast-ink:#e5e7eb;
+      --bg:#0f172a; --card:#1e293b; --ink:#f1f5f9; --muted:#94a3b8;
+      --border:#334155; --accent:#38bdf8; --accent2:#06b6d4;
+      --chip-bg:#1e293b; --pill-bg:#334155; --btn-ink:#0f172a;
+      --ok-bg:#052e16; --ok-br:#22c55e; --ok-ink:#bbf7d0;
+      --warn-bg:#422006; --warn-br:#ca8a04; --warn-ink:#fde047;
+      --bad-bg:#450a0a; --bad-br:#ef4444; --bad-ink:#fecaca;
+      --fri-bg:#172554; --fri-br:#1e40af;
+      --toast-bg:#1e293b; --toast-br:#475569; --toast-ink:#f1f5f9;
     }
     html[data-theme="light"]{
-      --bg:#f6f8fb; --card:#ffffff; --ink:#0b1222; --muted:#5b6472;
-      --border:#dce3ea;
-      --chip-bg:#f4f7fb; --pill-bg:#f6fafc;
-      --toast-bg:#ffffff; --toast-br:#dce3ea; --toast-ink:#0b1222;
+      --bg:#f1f5f9; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+      --border:#e2e8f0;
+      --chip-bg:#f8fafc; --pill-bg:#f1f5f9;
+      --ok-bg:#dcfce7; --ok-br:#22c55e; --ok-ink:#14532d;
+      --warn-bg:#fef9c3; --warn-br:#eab308; --warn-ink:#713f12;
+      --bad-bg:#fee2e2; --bad-br:#ef4444; --bad-ink:#7f1d1d;
+      --fri-bg:#eff6ff; --fri-br:#bfdbfe;
+      --toast-bg:#ffffff; --toast-br:#cbd5e1; --toast-ink:#0f172a;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant",system-ui;}
-    .app{max-width:1600px;margin:0 auto;padding:16px 16px 56px;min-height:100vh}
-    header.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
-    .title{margin:0;font-size:34px;font-weight:800}
-    .sub{color:var(--muted);font-size:14px;margin-top:6px;margin-bottom:16px;display:block}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant",system-ui;padding-bottom:80px;}
+    .app{max-width:1600px;margin:0 auto;padding:16px;}
+    
+    /* Header */
+    header.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
+    .title{margin:0;font-size:28px;font-weight:800}
+    .sub{color:var(--muted);font-size:14px;margin-top:4px;display:block}
     .header-actions{display:flex;gap:8px;align-items:center}
-    .id-badge{border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:13px}
-    button{cursor:pointer;border:none;border-radius:12px;padding:10px 14px;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));color:var(--btn-ink)}
+    .id-badge{border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:13px;background:var(--card)}
+    
+    /* Buttons */
+    button{cursor:pointer;border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-family:inherit;font-size:14px;transition:0.2s;}
+    button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--btn-ink)}
+    button.primary:hover{opacity:0.9;transform:translateY(-1px)}
     button.ghost{background:transparent;border:1px solid var(--border);color:var(--ink)}
-    .icon-btn{width:48px;height:48px;display:inline-flex;align-items:center;justify-content:center;border-radius:14px;background:var(--chip-bg);border:1px solid var(--border)}
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
-    .panel .hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+    button.ghost:hover{background:var(--pill-bg)}
+    .icon-btn{width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--ink)}
+    
+    /* Layout */
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
+    .panel .hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .panel .bd{padding:16px}
-
-    .split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,0.7fr);gap:16px}
+    .split{display:grid;grid-template-columns:1fr 340px;gap:16px}
     @media(max-width:1000px){.split{grid-template-columns:1fr}}
 
-    .schedule-header{display:flex;gap:8px;align-items:center}
-    .badge{border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:13px;color:var(--muted)}
-    .schedule{display:grid;grid-template-columns:minmax(90px,9ch) repeat(6, minmax(0,1fr));gap:10px}
-    @media(max-width:1200px){.schedule{grid-template-columns:1fr}.schedule .col-hd{display:none}}
-    .col-hd{text-align:center;color:var(--muted);font-size:13px}
-    .slot{background:var(--chip-bg);border:1px solid var(--border);border-radius:12px;min-height:80px;padding:8px;display:flex;flex-direction:column;gap:6px}
+    /* Schedule Grid */
+    .schedule-header{display:flex;gap:10px;align-items:center}
+    .badge{border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);background:var(--bg)}
+    
+    /* Grid Layout: Time Label + 6 Days */
+    .schedule{display:grid;grid-template-columns:90px repeat(6, 1fr);gap:8px;overflow-x:auto}
+    @media(max-width:1200px){.schedule{min-width:800px}} /* Force scroll on small screens */
+    
+    .col-hd{text-align:center;color:var(--muted);font-size:13px;font-weight:700;padding-bottom:4px}
+    .row-label{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);text-align:center;line-height:1.2}
+    
+    .slot{background:var(--bg);border:1px solid var(--border);border-radius:12px;min-height:90px;padding:8px;display:flex;flex-direction:column;gap:6px;position:relative}
     .slot.fri{background:var(--fri-bg);border-color:var(--fri-br)}
-    .datebox{border:1px solid var(--border);border-radius:10px;padding:6px 8px}
-    .datebox .d-top{font-weight:700}
-    .pill{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:4px 8px;border:1px solid var(--border);background:var(--pill-bg);font-size:12px}
+    .slot.empty{opacity:0.5;background:repeating-linear-gradient(45deg,transparent,transparent 10px,var(--pill-bg) 10px,var(--pill-bg) 20px)}
+    
+    .datebox{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:2px}
+    .d-top{font-weight:700;color:var(--ink)}
+    
+    .pill{display:inline-flex;gap:6px;align-items:center;border-radius:6px;padding:3px 8px;border:1px solid var(--border);background:var(--pill-bg);font-size:12px;width:fit-content}
     .pill.ok{background:var(--ok-bg);border-color:var(--ok-br);color:var(--ok-ink)}
     .pill.bad{background:var(--bad-bg);border-color:var(--bad-br);color:var(--bad-ink)}
     .pill.warn{background:var(--warn-bg);border-color:var(--warn-br);color:var(--warn-ink)}
+    .pill b{font-weight:700}
 
-    .days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-    .day{background:var(--chip-bg);border:1px dashed var(--border);border-radius:12px;padding:10px;min-height:58px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:4px}
-    .day.state-1{background:var(--warn-bg);border-color:var(--warn-br)}
-    .day.state-2{background:var(--bad-bg);border-color:var(--bad-br)}
-    .day.shabbat{opacity:.35;cursor:not-allowed}
-    .legend{display:flex;gap:12px;font-size:13px;color:var(--muted)}
-    .legend span.dot{width:14px;height:14px;border-radius:4px;border:1px solid var(--border);display:inline-block;margin-inline-end:4px}
-    .dot.bg0{background:var(--chip-bg)}
-    .dot.bg1{background:#231e07}
-    .dot.bg2{background:#2b0a0a}
+    /* Constraints & Chips */
+    .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .day{background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:8px;min-height:50px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px;font-size:13px;transition:0.1s}
+    .day:hover{border-color:var(--accent)}
+    .day.state-1{background:var(--warn-bg);border-color:var(--warn-br);border-style:solid} /* Prefer not */
+    .day.state-2{background:var(--bad-bg);border-color:var(--bad-br);border-style:solid} /* Cannot */
+    .day.shabbat{opacity:.3;cursor:not-allowed;background:var(--pill-bg)}
+    
+    .legend{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-bottom:8px}
+    .legend span{display:flex;align-items:center;gap:4px}
+    .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .dot.bg0{background:var(--bg);border:1px dashed var(--muted)}
+    .dot.bg1{background:var(--warn-br)}
+    .dot.bg2{background:var(--bad-br)}
 
-    .toast-wrap{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:8px}
-    .toast{background:var(--toast-bg);border:1px solid var(--toast-br);color:var(--toast-ink);padding:10px 14px;border-radius:14px;display:flex;gap:10px;align-items:flex-start;box-shadow:0 10px 40px rgba(0,0,0,.35);min-width:260px}
-    .toast .btn{background:transparent;border:1px solid var(--border);border-radius:999px;padding:4px 10px}
+    .chip{background:var(--chip-bg);border:1px solid var(--border);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:13px;transition:0.2s}
+    .chip:hover{background:var(--pill-bg)}
+    .chip.active{background:var(--accent);color:var(--btn-ink);border-color:var(--accent);font-weight:700}
+    #peopleChips{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:9999}
-    .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:540px;width:90%;padding:18px}
-    .modal h2{margin-top:0}
+    /* Modals & Toasts */
+    .toast-wrap{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+    .toast{pointer-events:all;background:var(--toast-bg);border:1px solid var(--toast-br);color:var(--toast-ink);padding:10px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 10px 40px rgba(0,0,0,0.3);min-width:300px;animation:slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)}
+    @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9999}
+    .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:500px;width:90%;padding:24px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.3)}
+    .modal h2{margin-top:0;font-size:22px}
+    input, select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--ink);font-family:inherit;outline:none}
+    input:focus, select:focus{border-color:var(--accent)}
 
-    .bottom-tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(7,11,20,.85);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,.05);display:flex;gap:8px;padding:6px 16px;overflow-x:auto}
-    .tab{padding:6px 12px;border-radius:999px;border:1px solid transparent;color:#d1d5db;white-space:nowrap;cursor:pointer}
-    .tab.active{background:#1f2937;border-color:#38bdf8;color:white}
-
-    .chip{background:var(--chip-bg);border:1px solid var(--border);border-radius:999px;padding:6px 10px;cursor:pointer}
-    .chip.active{outline:2px solid var(--accent)}
-    #peopleChips{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-
-    .lock-pill{font-size:12px;padding:2px 6px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.05)}
+    /* Bottom Tabs */
+    .bottom-tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;gap:8px;padding:10px 16px;overflow-x:auto;z-index:500}
+    .tab{padding:6px 14px;border-radius:999px;border:1px solid transparent;color:var(--muted);white-space:nowrap;cursor:pointer;font-size:14px;transition:0.2s}
+    .tab:hover{background:var(--pill-bg)}
+    .tab.active{background:var(--accent);color:var(--btn-ink);font-weight:700}
+    
     .admin-bar{position:fixed;left:16px;top:16px;z-index:10001;display:flex;gap:8px}
   </style>
 </head>
 <body>
-  <!-- admin button -->
+  <!-- Admin Button -->
   <div class="admin-bar">
-    <button id="adminBtn" class="icon-btn" title="פאנל ניהול">
-      ⚙️
-    </button>
+    <button id="adminBtn" class="icon-btn" title="פאנל ניהול" style="display:none">⚙️</button>
   </div>
 
   <div class="app">
     <header class="header">
       <div>
         <h1 class="title">לוח שיבוצים</h1>
-        <span class="sub" id="globalShiftDesc">א׳–ה׳ 16:00–22:00 · ו׳ 08:00–14:00 · שבת – אין משמרת</span>
+        <span class="sub" id="globalShiftDesc">א׳–ה׳ 16:00–22:00 · ו׳ 08:00–14:00</span>
       </div>
       <div class="header-actions">
         <span id="whoami" class="id-badge">לא מחובר</span>
         <button id="switchUserBtn" class="ghost">החלף משתמש</button>
-        <button id="themeBtn" class="icon-btn" title="מצב בהיר/כהה">
-          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></svg>
-        </button>
+        <button id="themeBtn" class="icon-btn" title="מצב בהיר/כהה">🌙</button>
       </div>
     </header>
 
-    <main class="split" style="margin-top:10px">
-      <!-- schedule side -->
+    <main class="split">
+      <!-- Schedule Side -->
       <section class="panel">
         <div class="hd">
-          <div class="schedule-header" style="gap:10px">
+          <div class="schedule-header">
             <h3 style="margin:0" id="scheduleTitle">לוח שיבוצים</h3>
             <span id="dateRangeBadge" class="badge"></span>
-            <span id="lockBadge" class="lock-pill" style="display:none;">🔒 לוח נעול</span>
+            <span id="lockBadge" class="badge" style="background:var(--bad-bg);color:var(--bad-ink);border-color:var(--bad-br);display:none;">🔒 נעול</span>
           </div>
-          <div style="margin-inline-start:auto;display:flex;gap:6px">
-            <button id="computeBtn" class="ghost">חשב שיבוץ</button>
-            <button id="exportBtn" class="ghost">יצוא CSV</button>
-            <button id="shareBtn" class="ghost">שיתוף</button>
-            <button id="addCalendarBtn" class="ghost">הוסף ליומן</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button id="computeBtn" class="ghost">⚡ חשב</button>
+            <button id="exportBtn" class="ghost">📥 CSV</button>
+            <button id="addCalendarBtn" class="ghost">📅 יומן</button>
           </div>
         </div>
         <div class="bd">
           <div id="scheduleGrid" class="schedule"></div>
-          <div id="summaryBox" style="margin-top:12px"></div>
+          <div id="summaryBox" style="margin-top:16px"></div>
         </div>
       </section>
 
-      <!-- constraints side -->
+      <!-- Constraints Side -->
       <section class="panel">
-        <div class="hd" style="justify-content:space-between">
-          <div>
-            <h3 style="margin:0">אילוצים לטווח הפעיל</h3>
-            <div class="legend" style="margin-top:4px">
-              <span><span class="dot bg0"></span>זמין</span>
-              <span><span class="dot bg1"></span>מעדיף שלא</span>
-              <span><span class="dot bg2"></span>לא זמין</span>
-            </div>
-          </div>
+        <div class="hd">
+          <h3 style="margin:0">האילוצים שלי</h3>
         </div>
         <div class="bd">
           <div id="peopleChips"></div>
-          <div id="daysGrid" class="days" style="margin-bottom:10px"></div>
-          <p style="color:var(--muted);font-size:12px">טפיחה על יום מחליפה מצב: זמין → מעדיף שלא → לא זמין → זמין.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button id="saveBtn">שמור לענן</button>
-            <button id="resetMineBtn" class="ghost">אפס את האילוצים שלי</button>
+          
+          <div class="legend">
+            <span><span class="dot bg0"></span>זמין</span>
+            <span><span class="dot bg1"></span>מעדיף שלא</span>
+            <span><span class="dot bg2"></span>לא יכול</span>
+          </div>
+
+          <div id="daysGrid" class="days" style="margin-bottom:16px"></div>
+          
+          <p style="color:var(--muted);font-size:13px;line-height:1.4">
+            לחיצה על יום משנה את המצב.<br>
+            השינויים נשמרים כשתלחץ על "שמור שינויים".
+          </p>
+          
+          <div style="display:flex;gap:8px;flex-direction:column">
+            <button id="saveBtn" class="primary" style="width:100%">💾 שמור שינויים</button>
+            <button id="resetMineBtn" class="ghost" style="width:100%">אפס את האילוצים שלי</button>
           </div>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- bottom tabs -->
+  <!-- Bottom Tabs -->
   <div id="bottomTabs" class="bottom-tabs"></div>
 
-  <!-- user modal -->
+  <!-- User Modal -->
   <div id="identityBackdrop" class="modal-backdrop">
     <div class="modal">
-      <h2>בחר משתמש</h2>
-      <p>בחר את השם שלך מהרשימה. (אין סיסמה)</p>
-      <div class="row">
-        <label for="identitySelect">משתמש</label>
-        <select id="identitySelect" style="width:100%;margin-top:6px;background:var(--chip-bg);border:1px solid var(--border);border-radius:10px;padding:8px"></select>
+      <h2>היי, מי את/ה?</h2>
+      <p style="color:var(--muted)">בחר/י את השם שלך מהרשימה כדי להתחיל.</p>
+      <div style="margin-bottom:16px">
+        <label for="identitySelect" style="display:block;margin-bottom:6px;font-weight:600">משתמש</label>
+        <select id="identitySelect"></select>
       </div>
-      <p id="identityHint" style="color:var(--muted);font-size:13px;margin-top:10px">אין אותך ברשימה? המנהל יכול להוסיף אותך מפאנל הניהול.</p>
-      <div style="display:flex;justify-content:flex-end;margin-top:12px">
-        <button id="identityStartBtn">התחל</button>
+      <div style="display:flex;justify-content:flex-end">
+        <button id="identityStartBtn" class="primary">התחל</button>
       </div>
     </div>
   </div>
 
-  <!-- admin modal -->
+  <!-- Admin Modal -->
   <div id="adminBackdrop" class="modal-backdrop">
     <div class="modal">
-      <h2>ניהול חדר</h2>
-      <p>רק מנהל יכול לשנות את זה.</p>
-      <div style="margin-bottom:8px">
-        <label>תאריך התחלה</label>
-        <input id="adminStartDate" type="date" style="width:100%;margin-top:4px;background:var(--chip-bg);border:1px solid var(--border);border-radius:10px;padding:8px">
+      <h2>הגדרות חדר</h2>
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px">תאריך התחלה (יום ראשון)</label>
+        <input id="adminStartDate" type="date">
       </div>
-      <div style="margin-bottom:8px">
-        <label>טווח חישוב (בשבועות)</label>
-        <input id="adminHorizon" type="number" min="1" max="6" value="4" style="width:100%;margin-top:4px;background:var(--chip-bg);border:1px solid var(--border);border-radius:10px;padding:8px">
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px">מספר שבועות לחישוב</label>
+        <input id="adminHorizon" type="number" min="1" max="8" value="4">
       </div>
-      <div style="margin-bottom:8px">
-        <label>נעול עד (ריק = לא נעול)</label>
-        <input id="adminLockUntil" type="date" style="width:100%;margin-top:4px;background:var(--chip-bg);border:1px solid var(--border);border-radius:10px;padding:8px">
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px">נעול עד תאריך (ריק = פתוח)</label>
+        <input id="adminLockUntil" type="date">
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-        <button id="adminCloseBtn" class="ghost">סגור</button>
-        <button id="adminSaveBtn">שמור</button>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+        <button id="adminCloseBtn" class="ghost">ביטול</button>
+        <button id="adminSaveBtn" class="primary">שמור הגדרות</button>
       </div>
     </div>
   </div>
 
-  <!-- toasts -->
+  <!-- Toast Container -->
   <div id="toastWrap" class="toast-wrap" aria-live="polite"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, getDocs, collection, deleteField, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-    // ===== Firebase config (חדש) =====
+    // --- Config ---
     const firebaseConfig = {
       apiKey: "AIzaSyBiZIHRpbg0bq4VFZ2kDDXj6QeRJZpjOpg",
       authDomain: "sadna-timetable.firebaseapp.com",
@@ -219,9 +248,8 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db   = getFirestore(app);
+    const db = getFirestore(app);
 
-    // ===== החדרים והאנשים שנתת =====
     const DEFAULT_GROUPS = {
       "מדפסות": { name: "מדפסות", people: ["נבו","נטע","טל"], horizonWeeks: 4 },
       "תפירה": { name: "תפירה", people: ["כליל","עמית","שירה"], horizonWeeks: 4 },
@@ -229,753 +257,627 @@
       "עיבוד שבבים": { name: "עיבוד שבבים", people: ["ליעד"], horizonWeeks: 4 },
       "עץ": { name: "עץ", people: ["אורי"], horizonWeeks: 4 }
     };
-
-    // נעשה גם משתמשים דיפולטיים
+    
+    // Fallback users if DB is empty
     const DEFAULT_USERS = [
       { id: "u-navo", name: "נבו", group: "מדפסות", role: "admin" },
       { id: "u-neta", name: "נטע", group: "מדפסות", role: "user" },
       { id: "u-tal",  name: "טל",  group: "מדפסות", role: "user" },
-
       { id: "u-klil", name: "כליל", group: "תפירה", role: "user" },
       { id: "u-amit", name: "עמית", group: "תפירה", role: "user" },
       { id: "u-shira",name: "שירה", group: "תפירה", role: "user" },
-
       { id: "u-mai",  name: "מאי", group: "מתכת", role: "user" },
       { id: "u-liad", name: "ליעד", group: "עיבוד שבבים", role: "user" },
-      { id: "u-uri",  name: "אורי", group: "עץ", role: "user" },
+      { id: "u-uri",  name: "אורי", group: "עץ", role: "user" }
     ];
 
-    // ===== Globals =====
+    // --- Globals ---
     const MS_DAY = 86400000;
-    const hebDaysLong=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
-    const MIN_PER_PERSON = 2;
+    const hebDaysShort = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
+    const MIN_PER_PERSON = 2; // Target shifts per person per week
 
-    let activeUser = null;           // {id,name,group,role}
-    let currentGroupId = null;       // string
-    let currentGroupData = null;     // {startDate,horizonWeeks,lockedUntil,people:[]}
-    let state = Object.create(null); // constraints for group+month
-    let peopleInGroup = [];          // array of names defined for group
+    let activeUser = null;
+    let currentGroupId = null;
+    let currentGroupData = null;
+    let state = {}; // { "2023-11-27": { "Nevo": 1, "Tal": 2 } }
+    let peopleInGroup = [];
     let unsubConstraints = null;
+    let lastComputedPack = null;
 
-    // ===== DOM =====
-    const whoamiEl = document.getElementById("whoami");
-    const switchUserBtn = document.getElementById("switchUserBtn");
-    const themeBtn = document.getElementById("themeBtn");
-    const themeIcon = document.getElementById("themeIcon");
-    const daysGrid = document.getElementById("daysGrid");
-    const scheduleGrid = document.getElementById("scheduleGrid");
-    const dateRangeBadge = document.getElementById("dateRangeBadge");
-    const bottomTabs = document.getElementById("bottomTabs");
-    const saveBtn = document.getElementById("saveBtn");
-    const resetMineBtn = document.getElementById("resetMineBtn");
-    const computeBtn = document.getElementById("computeBtn");
-    const exportBtn = document.getElementById("exportBtn");
-    const shareBtn = document.getElementById("shareBtn");
-    const addCalendarBtn = document.getElementById("addCalendarBtn");
-    const summaryBox = document.getElementById("summaryBox");
-    const toastWrap = document.getElementById("toastWrap");
-    const peopleChips = document.getElementById("peopleChips");
-    const identityBackdrop = document.getElementById("identityBackdrop");
-    const identitySelect = document.getElementById("identitySelect");
-    const identityStartBtn = document.getElementById("identityStartBtn");
-    const scheduleTitle = document.getElementById("scheduleTitle");
-    const lockBadge = document.getElementById("lockBadge");
-    const adminBtn = document.getElementById("adminBtn");
-    const adminBackdrop = document.getElementById("adminBackdrop");
-    const adminStartDate = document.getElementById("adminStartDate");
-    const adminHorizon = document.getElementById("adminHorizon");
-    const adminLockUntil = document.getElementById("adminLockUntil");
-    const adminSaveBtn = document.getElementById("adminSaveBtn");
-    const adminCloseBtn = document.getElementById("adminCloseBtn");
+    // --- DOM Elements ---
+    const els = {
+      whoami: document.getElementById("whoami"),
+      switchUser: document.getElementById("switchUserBtn"),
+      themeBtn: document.getElementById("themeBtn"),
+      daysGrid: document.getElementById("daysGrid"),
+      scheduleGrid: document.getElementById("scheduleGrid"),
+      dateRangeBadge: document.getElementById("dateRangeBadge"),
+      lockBadge: document.getElementById("lockBadge"),
+      tabs: document.getElementById("bottomTabs"),
+      save: document.getElementById("saveBtn"),
+      reset: document.getElementById("resetMineBtn"),
+      compute: document.getElementById("computeBtn"),
+      export: document.getElementById("exportBtn"),
+      calendar: document.getElementById("addCalendarBtn"),
+      summary: document.getElementById("summaryBox"),
+      toastWrap: document.getElementById("toastWrap"),
+      chips: document.getElementById("peopleChips"),
+      modalId: document.getElementById("identityBackdrop"),
+      selectId: document.getElementById("identitySelect"),
+      startId: document.getElementById("identityStartBtn"),
+      title: document.getElementById("scheduleTitle"),
+      adminBtn: document.getElementById("adminBtn"),
+      modalAdmin: document.getElementById("adminBackdrop"),
+      adminStart: document.getElementById("adminStartDate"),
+      adminHorizon: document.getElementById("adminHorizon"),
+      adminLock: document.getElementById("adminLockUntil"),
+      adminSave: document.getElementById("adminSaveBtn"),
+      adminClose: document.getElementById("adminCloseBtn")
+    };
 
-    // ===== Theme init =====
-    const savedTheme = localStorage.getItem("scheduler_theme");
-    if(savedTheme){ document.documentElement.setAttribute("data-theme", savedTheme); }
-    renderThemeIcon();
-    themeBtn.addEventListener("click", ()=> {
-      const cur = document.documentElement.getAttribute("data-theme") || "dark";
-      const next = cur === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("scheduler_theme", next);
-      renderThemeIcon();
-    });
-    function renderThemeIcon(){
-      const mode = document.documentElement.getAttribute("data-theme") || "dark";
-      themeIcon.innerHTML = mode === "dark"
-        ? `<path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M3 12h2M19 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><circle cx="12" cy="12" r="4"/>`
-        : `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    // --- Helpers ---
+    // Parses "YYYY-MM-DD" to Local Midnight Date Object
+    function parseLocalDate(str) {
+      if(!str) return new Date();
+      const [y,m,d] = str.split('-').map(Number);
+      return new Date(y, m-1, d, 0, 0, 0, 0);
+    }
+    
+    // Formats Date Object to "YYYY-MM-DD" (Local)
+    function fmtDateKey(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
     }
 
-    // ===== Utils =====
-    function startOfDay(d){ const c=new Date(d); c.setHours(0,0,0,0); return c; }
-    function addDays(d,n){ return new Date(startOfDay(d).getTime() + n*MS_DAY); }
-    function prevSunday(d){ let x=startOfDay(d); while(x.getDay()!==0){ x=addDays(x,-1);} return x; }
-    function fmtDateKey(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${dd}`; }
-    function fmtDM(d){ const dd=String(d.getDate()).padStart(2,"0"), mm=String(d.getMonth()+1).padStart(2,"0"); return `${dd}.${mm}`; }
-    function rangeDays(d0,d1){ const out=[]; let t=d0.getTime(), t1=d1.getTime(); for(;t<=t1;t+=MS_DAY) out.push(new Date(t)); return out; }
-    function shiftForWeekday(jsDow){ if(jsDow>=0 && jsDow<=4) return {label:"16:00–22:00"}; if(jsDow===5) return {label:"08:00–14:00"}; return null; }
-    function weekIndexFor(date, startDate){ let s = prevSunday(startDate); return Math.floor((startOfDay(date) - s) / (7*MS_DAY)); }
-
-    function toast(msg,type="ok"){
-      const el = document.createElement("div");
-      el.className = "toast " + type;
-      el.innerHTML = `<div>${msg}</div><div class="t-actions"><button class="btn">סגור</button></div>`;
-      toastWrap.appendChild(el);
-      const close = ()=>{ el.style.opacity="0"; el.style.transform="translateY(4px)"; setTimeout(()=>el.remove(),220); };
-      el.querySelector(".btn").onclick = close;
-      setTimeout(close, 3500);
+    function fmtDM(d) { return `${d.getDate()}.${d.getMonth()+1}`; }
+    function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+    
+    // Returns Sunday of the same week
+    function getSunday(d) {
+      const day = d.getDay();
+      return addDays(d, -day);
     }
-
-    // ===== Firestore helpers =====
-    async function bootstrapIfEmpty(){
-      // users
-      const userSnap = await getDocs(collection(db,"users"));
-      if(userSnap.empty){
-        await Promise.all(DEFAULT_USERS.map(u=> setDoc(doc(db,"users",u.id),{
-          name:u.name, group:u.group, role:u.role
-        }, {merge:true})));
-      }
-      // groups
-      const groupSnap = await getDocs(collection(db,"groups"));
-      if(groupSnap.empty){
-        const writes = [];
-        for(const [id,g] of Object.entries(DEFAULT_GROUPS)){
-          writes.push(setDoc(doc(db,"groups",id),{
-            name:g.name,
-            people:g.people,
-            startDate: new Date().toISOString().slice(0,10),
-            horizonWeeks: g.horizonWeeks,
-            lockedUntil: ""
-          },{merge:true}));
-        }
-        await Promise.all(writes);
-      }
-    }
-
-    async function loadAllUsers(){
-      const snap = await getDocs(collection(db, "users"));
-      const arr = [];
-      snap.forEach(d => arr.push({ id:d.id, ...d.data() }));
-      window.__ALL_USERS__ = arr;
-      identitySelect.innerHTML = arr.map(u=> `<option value="${u.id}">${u.name} (${u.group})${u.role==="admin"?" · מנהל":""}</option>`).join("");
+    
+    function rangeDays(start, end) {
+      const arr=[];
+      let c = new Date(start);
+      while(c <= end) { arr.push(new Date(c)); c = addDays(c,1); }
       return arr;
     }
 
-    async function ensureGroupDoc(groupId){
-      const gRef = doc(db, "groups", groupId);
-      const gSnap = await getDoc(gRef);
-      if(!gSnap.exists()){
-        const def = DEFAULT_GROUPS[groupId] || {name:groupId,people:[],horizonWeeks:4};
-        await setDoc(gRef, {
-          name: def.name,
-          people: def.people,
-          startDate: new Date().toISOString().slice(0,10),
-          horizonWeeks: def.horizonWeeks,
-          lockedUntil: ""
-        }, { merge:true });
-        return (await getDoc(gRef)).data();
-      }
-      return gSnap.data();
+    function shiftInfo(d) {
+      const day = d.getDay();
+      if(day === 5) return { label: "08:00–14:00" };
+      if(day === 6) return null; // Shabbat
+      return { label: "16:00–22:00" };
     }
 
-    async function loadConstraintsForGroup(groupId, gData){
-      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
-      const weeks = gData?.horizonWeeks || 4;
-      const endDate = addDays(startDate, weeks*7 - 1);
-      const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,"0")}`;
-      state = Object.create(null);
-      const q = collection(db, "groups", groupId, "constraints", monthKey, "days");
-      const snap = await getDocs(q);
-      snap.forEach(d => state[d.id] = d.data());
-
-      if(unsubConstraints){ unsubConstraints(); unsubConstraints=null; }
-      unsubConstraints = onSnapshot(q, (ss)=>{
-        ss.docChanges().forEach(ch=>{
-          if(!state[ch.doc.id]) state[ch.doc.id]={};
-          Object.assign(state[ch.doc.id], ch.doc.data());
-        });
-        renderCalendar();
-        const pack = computeSchedule();
-        renderSchedule(pack);
-        renderSummary(pack);
-      });
-
-      renderDateBadge(startDate, endDate);
+    function toast(msg, type="ok") {
+      const t = document.createElement("div");
+      t.className = `toast`;
+      // Colors handled by CSS via class inheritance logic or direct style if needed, 
+      // but simpler to use innerHTML for icon + text
+      let icon = type==="ok"?"✅":type==="warn"?"⚠️":"❌";
+      t.innerHTML = `<div><span style="margin-inline-end:8px">${icon}</span>${msg}</div>`;
+      els.toastWrap.appendChild(t);
+      setTimeout(() => { t.style.opacity="0"; setTimeout(()=>t.remove(),300); }, 3500);
     }
 
-    async function saveConstraints(){
-      if(!activeUser){ toast("בחר משתמש קודם.", "warn"); return; }
-      if(isBoardLockedForUser()){ toast("הלוח נעול.", "warn"); return; }
-      try{
-        const gData = currentGroupData;
-        const startDate = startOfDay(new Date(gData?.startDate || new Date()));
-        const weeks = gData?.horizonWeeks || 4;
-        const endDate = addDays(startDate, weeks*7 - 1);
-        const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,"0")}`;
-        const writes = [];
-        for(const [dateKey,val] of Object.entries(state)){
-          const clean = {};
-          for(const p of peopleInGroup){ if(val[p]!==undefined) clean[p]=Number(val[p])||0; }
-          writes.push(setDoc(doc(db, "groups", currentGroupId, "constraints", monthKey, "days", dateKey), clean, {merge:true}));
+    // --- Firebase Logic ---
+
+    async function bootstrap() {
+      // Create defaults if missing
+      try {
+        const uSnap = await getDocs(collection(db, "users"));
+        if(uSnap.empty) {
+          const batch = writeBatch(db);
+          DEFAULT_USERS.forEach(u => batch.set(doc(db,"users",u.id), u));
+          await batch.commit();
         }
-        await Promise.all(writes);
-        toast("נשמר בהצלחה.","ok");
-      }catch(err){ console.error(err); toast("שמירה נכשלה: " + err.message, "bad"); }
+        
+        const gSnap = await getDocs(collection(db, "groups"));
+        if(gSnap.empty) {
+          const batch = writeBatch(db);
+          for(const [k,v] of Object.entries(DEFAULT_GROUPS)) {
+            batch.set(doc(db,"groups",k), {
+              name: v.name,
+              people: v.people,
+              startDate: fmtDateKey(new Date()), // Today
+              horizonWeeks: v.horizonWeeks,
+              lockedUntil: ""
+            });
+          }
+          await batch.commit();
+        }
+      } catch(e) { console.error("Bootstrap error", e); }
     }
 
-    async function resetConstraints(){
-      if(!activeUser){ toast("בחר משתמש קודם.","warn"); return; }
-      const gData = currentGroupData;
-      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
-      const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,"0")}`;
+    async function loadUsers() {
+      const snap = await getDocs(collection(db, "users"));
+      const users = [];
+      snap.forEach(d => users.push({id:d.id, ...d.data()}));
+      window.__USERS__ = users;
+      
+      // Populate select
+      els.selectId.innerHTML = users.map(u => 
+        `<option value="${u.id}">${u.name} (${u.group}) ${u.role==='admin'?'[מנהל]':''}</option>`
+      ).join("");
+    }
+
+    async function switchGroup(groupId) {
+      // 1. Get Group Data
+      const gRef = doc(db, "groups", groupId);
+      let snap = await getDoc(gRef);
+      
+      if(!snap.exists()) {
+        // Fallback if group doc missing
+        currentGroupData = { ...DEFAULT_GROUPS[groupId], startDate: fmtDateKey(new Date()) };
+      } else {
+        currentGroupData = snap.data();
+      }
+      currentGroupId = groupId;
+      
+      // 2. Determine People
+      let pList = currentGroupData.people || [];
+      if(pList.length === 0 && window.__USERS__) {
+        pList = window.__USERS__.filter(u => u.group === groupId).map(u => u.name);
+      }
+      peopleInGroup = pList;
+
+      // 3. UI Updates
+      els.title.textContent = `לוח שיבוצים – ${currentGroupData.name || groupId}`;
+      renderTabs();
+      renderChips();
+      
+      // Check lock
+      const lockedDate = currentGroupData.lockedUntil ? parseLocalDate(currentGroupData.lockedUntil) : null;
+      const isLocked = lockedDate && new Date() < lockedDate;
+      els.lockBadge.style.display = isLocked ? "inline-block" : "none";
+      
+      // Admin modal populate
+      els.adminStart.value = currentGroupData.startDate || "";
+      els.adminHorizon.value = currentGroupData.horizonWeeks || 4;
+      els.adminLock.value = currentGroupData.lockedUntil || "";
+
+      // 4. Load Constraints
+      loadConstraints();
+    }
+
+    function loadConstraints() {
+      if(unsubConstraints) unsubConstraints();
+      state = {};
+      
+      const startDate = parseLocalDate(currentGroupData.startDate || fmtDateKey(new Date()));
+      const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}`;
+      
       const q = collection(db, "groups", currentGroupId, "constraints", monthKey, "days");
-      const snap = await getDocs(q);
-      await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
-      state = Object.create(null);
-      renderCalendar();
-      const p = computeSchedule(); renderSchedule(p); renderSummary(p);
-    }
-
-    // ===== Renderers =====
-    function renderDateBadge(startDate, endDate){
-      dateRangeBadge.textContent = `${fmtDM(startDate)} – ${fmtDM(endDate)}`;
-    }
-
-    function renderPeopleChips(){
-      peopleChips.innerHTML = peopleInGroup.map(name => {
-        const active = (activeUser && activeUser.name === name);
-        return `<button class="chip ${active?"active":""}" data-person="${name}">${name}</button>`;
-      }).join("");
-      peopleChips.querySelectorAll(".chip").forEach(btn=>{
-        btn.addEventListener("click", ()=> {
-          if(!activeUser) return;
-          // רק המשתמש עצמו או אדמין יכול לבחור
-          if(activeUser.name !== btn.dataset.person && activeUser.role !== "admin") return;
-          activeUser = { ...activeUser, name: btn.dataset.person };
-          whoamiEl.textContent = `אתה: ${activeUser.name} (${activeUser.group})${activeUser.role==="admin"?" · מנהל":""}`;
-          renderPeopleChips();
-          renderCalendar();
+      
+      unsubConstraints = onSnapshot(q, (snapshot) => {
+        snapshot.docChanges().forEach(change => {
+          if(change.type === "removed") {
+            delete state[change.doc.id];
+          } else {
+            state[change.doc.id] = change.doc.data();
+          }
         });
+        
+        renderCalendar();
+        runCompute(); // Auto re-compute on update
       });
     }
 
-    function renderCalendar(){
-      const gData = currentGroupData;
-      if(!gData) return;
-      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
-      const weeks = gData?.horizonWeeks || 4;
+    async function saveMyConstraints() {
+      if(!activeUser) return toast("יש להתחבר קודם","warn");
+      const lockedDate = currentGroupData.lockedUntil ? parseLocalDate(currentGroupData.lockedUntil) : null;
+      if(lockedDate && new Date() < lockedDate && activeUser.role !== 'admin') return toast("הלוח נעול לעריכה","warn");
+
+      const startDate = parseLocalDate(currentGroupData.startDate);
+      const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}`;
+      
+      const batch = writeBatch(db);
+      let count = 0;
+
+      // We only save days that exist in our local state to avoid overwrites
+      // Ideally we would only save diffs, but for simplicity we save the current user's state for modified days
+      for(const [dateKey, dayData] of Object.entries(state)) {
+        if(dayData[activeUser.name] !== undefined) {
+          const ref = doc(db, "groups", currentGroupId, "constraints", monthKey, "days", dateKey);
+          batch.set(ref, { [activeUser.name]: dayData[activeUser.name] }, { merge: true });
+          count++;
+        }
+      }
+      
+      if(count > 0) {
+        await batch.commit();
+        toast("השינויים נשמרו בהצלחה");
+      } else {
+        toast("לא זוהו שינויים לשמירה");
+      }
+    }
+
+    async function resetMyConstraints() {
+      if(!activeUser) return toast("יש להתחבר קודם","warn");
+      if(!confirm("האם לאפס את כל ההגדרות שלך ללוח זה?")) return;
+
+      const startDate = parseLocalDate(currentGroupData.startDate);
+      const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}`;
+      
+      // Get all docs where I have constraints
+      const q = collection(db, "groups", currentGroupId, "constraints", monthKey, "days");
+      const snapshot = await getDocs(q);
+      
+      const batch = writeBatch(db);
+      snapshot.forEach(d => {
+        const data = d.data();
+        if(data[activeUser.name] !== undefined) {
+          // Delete only my field
+          batch.update(d.ref, { [activeUser.name]: deleteField() });
+        }
+      });
+      
+      await batch.commit();
+      // Local state will update via onSnapshot
+      toast("האילוצים אופסו");
+    }
+
+    // --- Core Logic ---
+
+    function runCompute() {
+      if(!currentGroupData) return;
+      
+      const startDate = parseLocalDate(currentGroupData.startDate);
+      const weeks = Number(currentGroupData.horizonWeeks) || 4;
+      const endDate = addDays(startDate, weeks * 7 - 1);
+      const allDays = rangeDays(startDate, endDate);
+
+      // Init counters
+      const counters = { total: {}, week: [], friday: {} };
+      peopleInGroup.forEach(p => {
+        counters.total[p] = 0;
+        counters.friday[p] = 0;
+      });
+      // Init week buckets
+      for(let w=0; w<weeks; w++) {
+        counters.week[w] = {};
+        peopleInGroup.forEach(p => counters.week[w][p] = 0);
+      }
+
+      const assignment = {};
+
+      // Helper to get preference: 0=Avail, 1=PreferNo, 2=Cannot
+      const getPref = (dStr, p) => (state[dStr] && state[dStr][p] !== undefined) ? state[dStr][p] : 0;
+      
+      // 1. Simple Greedy pass
+      allDays.forEach(d => {
+        const sInfo = shiftInfo(d);
+        if(!sInfo) return; // Skip Shabbat
+        
+        const dStr = fmtDateKey(d);
+        const wIdx = Math.floor((d - startDate) / (7 * MS_DAY));
+        if(wIdx >= weeks) return;
+
+        // Candidates: Not blocked (2)
+        let candidates = peopleInGroup.filter(p => getPref(dStr, p) !== 2);
+        
+        // Filter out "Prefer No" (1) if possible
+        const avail = candidates.filter(p => getPref(dStr, p) === 0);
+        if(avail.length > 0) candidates = avail;
+
+        if(candidates.length === 0) {
+          assignment[dStr] = null; // No one available
+          return;
+        }
+
+        // Sort by fairness
+        candidates.sort((a,b) => {
+          // If Friday, prioritize those with fewer Fridays
+          if(d.getDay() === 5) {
+             if(counters.friday[a] !== counters.friday[b]) return counters.friday[a] - counters.friday[b];
+          }
+          // Prioritize fewer shifts this week
+          if(counters.week[wIdx][a] !== counters.week[wIdx][b]) return counters.week[wIdx][a] - counters.week[wIdx][b];
+          // Prioritize fewer total
+          return counters.total[a] - counters.total[b];
+        });
+
+        const winner = candidates[0];
+        assignment[dStr] = winner;
+        
+        // Update stats
+        counters.total[winner]++;
+        counters.week[wIdx][winner]++;
+        if(d.getDay() === 5) counters.friday[winner]++;
+      });
+
+      lastComputedPack = { assignment, counters, startDate, endDate, weeks };
+      renderSchedule();
+      renderSummary();
+    }
+
+    // --- Rendering ---
+
+    function renderTabs() {
+      const keys = Object.keys(DEFAULT_GROUPS);
+      els.tabs.innerHTML = keys.map(k => {
+        const isActive = k === currentGroupId ? "active" : "";
+        return `<div class="tab ${isActive}" data-g="${k}">${k}</div>`;
+      }).join("");
+      
+      els.tabs.querySelectorAll(".tab").forEach(el => {
+        el.onclick = () => switchGroup(el.dataset.g);
+      });
+    }
+
+    function renderChips() {
+      els.chips.innerHTML = peopleInGroup.map(p => {
+        const isMe = activeUser && activeUser.name === p;
+        const isActive = isMe; // Or if we want to view others? For now only me.
+        return `<div class="chip ${isActive?'active':''}" data-p="${p}">${p}</div>`;
+      }).join("");
+      
+      // Impersonation logic (only for clicking, visual only)
+      els.chips.querySelectorAll(".chip").forEach(el => {
+        el.onclick = () => {
+          if(!activeUser) return;
+          if(activeUser.role !== 'admin' && activeUser.name !== el.dataset.p) return;
+          // As admin, allow swapping identity locally for editing
+          if(activeUser.role === 'admin') {
+             activeUser = { ...activeUser, name: el.dataset.p };
+             renderChips();
+             renderCalendar();
+             toast(`עורך כעת את: ${el.dataset.p}`);
+          }
+        };
+      });
+    }
+
+    function renderCalendar() {
+      if(!currentGroupData) return;
+      const startDate = parseLocalDate(currentGroupData.startDate);
+      const weeks = Number(currentGroupData.horizonWeeks);
       const endDate = addDays(startDate, weeks*7 - 1);
-      const days = rangeDays(startDate, endDate);
-      let html = "";
-      for(const d of days){
-        const key = fmtDateKey(d);
-        const jsDow = d.getDay();
-        const sh = shiftForWeekday(jsDow);
-        const cur = state[key] || {};
-        const val = activeUser ? Number(cur[activeUser.name] ?? 0) : 0;
-        html += `
-          <div class="day ${jsDow===6?"shabbat":""} state-${val}" data-key="${key}">
-            <div>${hebDaysLong[jsDow]}, ${fmtDM(d)}</div>
-            <div style="color:var(--muted);font-size:12px">${sh?sh.label:"—"}</div>
+      const daysArr = rangeDays(startDate, endDate);
+      
+      els.daysGrid.innerHTML = daysArr.map(d => {
+        const dStr = fmtDateKey(d);
+        const dayOfWeek = d.getDay();
+        const isShabbat = dayOfWeek === 6;
+        
+        // Get status for active user
+        let status = 0;
+        if(activeUser && state[dStr]) {
+          status = state[dStr][activeUser.name] || 0;
+        }
+
+        const label = isShabbat ? "שבת" : (dayOfWeek === 5 ? "בוקר" : "ערב");
+        
+        return `
+          <div class="day state-${status} ${isShabbat?'shabbat':''}" data-d="${dStr}">
+            <div>${hebDaysShort[dayOfWeek]} ${fmtDM(d)}</div>
+            <div style="font-size:11px;color:var(--muted)">${label}</div>
           </div>
         `;
-      }
-      daysGrid.innerHTML = html;
-
-      daysGrid.querySelectorAll(".day").forEach(el=>{
-        const key = el.dataset.key;
-        const jsDow = new Date(key).getDay();
-        if(jsDow===6) return;
-        el.addEventListener("click", ()=>{
-          if(!activeUser){ toast("בחר משתמש קודם.", "warn"); return; }
-          if(isBoardLockedForUser()){ toast("הלוח נעול.", "warn"); return; }
-          const row = state[key] || {};
-          const old = Number(row[activeUser.name] ?? 0);
-          const next = (old + 1) % 3;
-          row[activeUser.name] = next;
-          state[key] = row;
-          el.classList.remove("state-0","state-1","state-2");
-          el.classList.add("state-"+next);
-        });
+      }).join("");
+      
+      els.daysGrid.querySelectorAll(".day").forEach(el => {
+        if(el.classList.contains("shabbat")) return;
+        el.onclick = () => {
+           if(!activeUser) return toast("בחר משתמש קודם","warn");
+           const dStr = el.dataset.d;
+           
+           // Toggle locally 0 -> 1 -> 2 -> 0
+           if(!state[dStr]) state[dStr] = {};
+           const curr = state[dStr][activeUser.name] || 0;
+           const next = (curr + 1) % 3;
+           state[dStr][activeUser.name] = next;
+           
+           renderCalendar(); // Re-render to show color change
+        };
       });
+      
+      els.dateRangeBadge.textContent = `${fmtDM(startDate)} – ${fmtDM(endDate)}`;
     }
 
-    function renderSchedule(pack){
-      const gData = currentGroupData;
-      if(!gData){ scheduleGrid.innerHTML=""; return; }
-      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
-      const weeks = gData?.horizonWeeks || 4;
-      const endDate = addDays(startDate, weeks*7 - 1);
+    function renderSchedule() {
+      if(!lastComputedPack) return;
+      const { assignment, startDate, weeks } = lastComputedPack;
+      
+      // Grid: 
+      // Header row
+      let html = `<div class="col-hd"></div>`;
+      for(let i=0; i<6; i++) html += `<div class="col-hd">${hebDaysShort[i]}</div>`;
+      
+      // Rows
+      for(let w=0; w<weeks; w++) {
+        const sunday = addDays(startDate, w*7);
+        const saturday = addDays(sunday, 6);
+        html += `<div class="row-label">
+                   ${fmtDM(sunday)}<br>–<br>${fmtDM(saturday)}
+                 </div>`;
+        
+        for(let d=0; d<6; d++) { // Sun-Fri
+          const currDate = addDays(sunday, d);
+          const dStr = fmtDateKey(currDate);
+          const winner = assignment[dStr];
+          
+          // Determine warnings
+          let warnHtml = "";
+          const prefs = state[dStr] || {};
+          
+          const prefersNo = peopleInGroup.filter(p => prefs[p] === 1);
+          const cannot = peopleInGroup.filter(p => prefs[p] === 2);
+          
+          if(prefersNo.length) warnHtml += `<div class="pill warn" title="מעדיפים שלא">${prefersNo.length} ⚠️</div>`;
+          if(cannot.length) warnHtml += `<div class="pill bad" title="לא יכולים">${cannot.length} ⛔</div>`;
+          
+          const isFri = d===5;
+          const assignedHtml = winner 
+            ? `<div class="pill ok"><b>${winner}</b></div>` 
+            : `<div class="pill bad">ריק</div>`;
 
-      const assign = pack.assign;
-      let html = `
-        <div></div>
-        <div class="col-hd">א׳</div>
-        <div class="col-hd">ב׳</div>
-        <div class="col-hd">ג׳</div>
-        <div class="col-hd">ד׳</div>
-        <div class="col-hd">ה׳</div>
-        <div class="col-hd">ו׳</div>
-      `;
-      let weekStart = prevSunday(startDate);
-      let guard=0;
-      while(weekStart <= endDate && guard++<80){
-        const weekEnd = addDays(weekStart,6);
-        const rowLabel = `${fmtDM(weekStart)} – ${fmtDM(weekEnd)}`;
-        html += `<div style="display:flex;align-items:center">${rowLabel}</div>`;
-        for(let i=0;i<6;i++){
-          const cur = addDays(weekStart,i);
-          const key = fmtDateKey(cur);
-          const inRange = cur>=startDate && cur<=endDate;
-          const sh = shiftForWeekday(cur.getDay());
-          if(!inRange || !sh){
-            html += `<div class="slot" style="opacity:.35"><div class="datebox"><div class="d-top">${hebDaysLong[cur.getDay()]}, ${fmtDM(cur)}</div><div class="d-time">אין משמרת</div></div></div>`;
-          }else{
-            const who = assign[key] || null;
-            const row = state[key] || {};
-            const absent = peopleInGroup.filter(p => Number(row[p]??0)===2);
-            const prefer = peopleInGroup.filter(p => Number(row[p]??0)===1);
-            const isFriday = cur.getDay()===5;
-            html += `
-              <div class="slot ${isFriday?'fri':''}">
-                <div class="datebox">
-                  <div class="d-top">${hebDaysLong[cur.getDay()]}, ${fmtDM(cur)}</div>
-                  <div class="d-time">${sh.label}</div>
-                </div>
-                <div class="${who ? 'pill ok':'pill bad'}">${who ? `משובץ: <b>${who}</b>` : '❌ אין משובץ'}</div>
-                ${prefer.length ? `<div class="pill warn">מעדיפים שלא: ${prefer.join(", ")}</div>` : ``}
-                ${absent.length ? `<div class="pill bad">לא זמינים: ${absent.join(", ")}</div>` : ``}
+          html += `
+            <div class="slot ${isFri?'fri':''}">
+              <div class="datebox">
+                <span class="d-top">${hebDaysShort[d]} ${fmtDM(currDate)}</span>
+                <span>${isFri?'08:00':'16:00'}</span>
               </div>
-            `;
-          }
-        }
-        weekStart = addDays(weekStart,7);
-      }
-      scheduleGrid.innerHTML = html;
-    }
-
-    function renderSummary(pack){
-      const { weekCounts, fridayCounts } = pack;
-      const html = `
-        <div class="panel" style="margin-top:10px">
-          <div class="hd"><h3 style="margin:0">סיכום שבועי + ימי שישי</h3></div>
-          <div class="bd">
-            <table style="width:100%;border-collapse:collapse;font-size:14px">
-              <thead>
-                <tr>
-                  <th style="text-align:right;border-bottom:1px solid var(--border);padding:4px">שבוע</th>
-                  ${peopleInGroup.map(p=>`<th style="text-align:center;border-bottom:1px solid var(--border);padding:4px">${p}</th>`).join("")}
-                </tr>
-              </thead>
-              <tbody>
-                ${weekCounts.map((wc,idx)=> `
-                  <tr>
-                    <td style="padding:4px;border-bottom:1px solid var(--border)">שבוע ${idx+1}</td>
-                    ${peopleInGroup.map(p=> `<td style="text-align:center;padding:4px;border-bottom:1px solid var(--border)">${wc?.[p] ?? 0}</td>`).join("")}
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-              ${peopleInGroup.map(p=> `<div class="pill">${p}: שישי <b>${fridayCounts?.[p] ?? 0}</b></div>`).join("")}
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px">
+                ${assignedHtml}
+                <div style="display:flex;gap:4px;flex-wrap:wrap">${warnHtml}</div>
+              </div>
             </div>
-          </div>
-        </div>
-      `;
-      summaryBox.innerHTML = html;
-    }
-
-    // ===== Logic =====
-    function canAssign(person, dateKey){
-      const row = state[dateKey] || {};
-      return Number(row[person] ?? 0) !== 2;
-    }
-
-    function computeSchedule(){
-      const gData = currentGroupData;
-      if(!gData) return {assign:{},weekCounts:[],fridayCounts:{},totalCounts:{}};
-      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
-      const weeks = gData?.horizonWeeks || 4;
-      const endDate = addDays(startDate, weeks*7 - 1);
-      const days = rangeDays(startDate, endDate);
-
-      const assign = {};
-      const totalCounts  = Object.fromEntries(peopleInGroup.map(p=>[p,0]));
-      const fridayCounts = Object.fromEntries(peopleInGroup.map(p=>[p,0]));
-      const weekCounts   = [];
-
-      const prefVal = (dayKey, person)=> Number((state[dayKey] || {})[person] ?? 0);
-      const hasOtherZero = (dayKey, exceptPerson)=>{
-        const row = state[dayKey] || {};
-        return peopleInGroup.some(p => p !== exceptPerson && Number(row[p] ?? 0) === 0);
-      };
-      const isFridayKey = (k)=> new Date(k).getDay()===5;
-      const ensureWeek = (idx)=>{ if(!weekCounts[idx]) weekCounts[idx] = Object.fromEntries(peopleInGroup.map(p=>[p,0])); };
-
-      // שלב 1: גרידי
-      for(const d of days){
-        const jsDow = d.getDay();
-        const sh = shiftForWeekday(jsDow);
-        if(!sh) continue;
-        const key = fmtDateKey(d);
-        const row = state[key] || {};
-        const available0 = peopleInGroup.filter(p => Number(row[p] ?? 0) === 0);
-        const prefer1    = peopleInGroup.filter(p => Number(row[p] ?? 0) === 1);
-        const wIdx = weekIndexFor(d, startDate); ensureWeek(wIdx);
-        let candidates = [];
-        if(available0.length) candidates = available0.slice();
-        else if(prefer1.length) candidates = prefer1.slice();
-
-        if(candidates.length){
-          candidates.sort((a,b)=>{
-            if(jsDow===5){
-              if(fridayCounts[a] !== fridayCounts[b]) return fridayCounts[a] - fridayCounts[b];
-            }
-            if(weekCounts[wIdx][a] !== weekCounts[wIdx][b]) return weekCounts[wIdx][a] - weekCounts[wIdx][b];
-            return totalCounts[a] - totalCounts[b];
-          });
-          const pick = candidates[0];
-          assign[key] = pick;
-          totalCounts[pick]++; weekCounts[wIdx][pick] = (weekCounts[wIdx][pick]||0)+1;
-          if(jsDow===5) fridayCounts[pick]++;
-        }else{
-          assign[key] = null;
+          `;
         }
       }
+      els.scheduleGrid.innerHTML = html;
+    }
 
-      // קבוצת מפת שבוע -> ימים
-      const allKeys = Object.keys(assign);
-      const keysByWeek = {};
-      for(const k of allKeys){
-        const wIdx = weekIndexFor(new Date(k), startDate); ensureWeek(wIdx);
-        (keysByWeek[wIdx] ||= []).push(k);
-      }
+    function renderSummary() {
+      if(!lastComputedPack) return;
+      const { counters, weeks } = lastComputedPack;
+      
+      let html = `<table style="width:100%;border-collapse:collapse;font-size:13px;text-align:center">`;
+      html += `<thead><tr><th style="padding:4px;text-align:right">שם</th>`;
+      for(let w=1; w<=weeks; w++) html += `<th style="padding:4px">שב׳ ${w}</th>`;
+      html += `<th style="padding:4px">סה״כ</th><th style="padding:4px">שישי</th></tr></thead><tbody>`;
+      
+      peopleInGroup.forEach(p => {
+        html += `<tr><td style="padding:6px;text-align:right;border-top:1px solid var(--border)">${p}</td>`;
+        for(let w=0; w<weeks; w++) {
+           html += `<td style="padding:6px;border-top:1px solid var(--border)">${counters.week[w][p]}</td>`;
+        }
+        html += `<td style="padding:6px;border-top:1px solid var(--border);font-weight:bold">${counters.total[p]}</td>`;
+        html += `<td style="padding:6px;border-top:1px solid var(--border)">${counters.friday[p]}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+      els.summary.innerHTML = html;
+    }
 
-      // שלב 2: לפחות 2 בשבוע
-      for(const wIdxStr of Object.keys(keysByWeek)){
-        const wIdx = Number(wIdxStr);
-        const weekKeys = keysByWeek[wIdx];
-
-        for(const person of peopleInGroup){
-          while((weekCounts[wIdx][person] || 0) < MIN_PER_PERSON){
-            // קודם נסה יום ריק
-            const empty = weekKeys.find(k => !assign[k] && canAssign(person,k));
-            if(empty){
-              const pref = prefVal(empty, person);
-              if(!(pref === 1 && hasOtherZero(empty, person))){
-                assign[empty] = person;
-                weekCounts[wIdx][person] = (weekCounts[wIdx][person]||0)+1;
-                totalCounts[person]++;
-                if(isFridayKey(empty)) fridayCounts[person]++;
-                continue;
-              }
-            }
-
-            // אין יום ריק – לקחת מתורם
-            const donors = peopleInGroup
-              .filter(p => p !== person && (weekCounts[wIdx][p]||0) > MIN_PER_PERSON)
-              .sort((a,b)=> (weekCounts[wIdx][b]||0) - (weekCounts[wIdx][a]||0));
-            let moved = false;
-            for(const donor of donors){
-              const bucket1 = weekKeys.filter(k => assign[k]===donor && !isFridayKey(k));
-              const bucket2 = weekKeys.filter(k => assign[k]===donor &&  isFridayKey(k));
-              const buckets = [bucket1, bucket2];
-              for(const bucket of buckets){
-                const sorted = bucket.slice().sort((a,b)=> prefVal(a,person) - prefVal(b,person));
-                for(const dayKey of sorted){
-                  if(!canAssign(person, dayKey)) continue;
-                  const pref = prefVal(dayKey, person);
-                  if(pref === 1 && hasOtherZero(dayKey, person)) continue;
-                  assign[dayKey] = person;
-                  weekCounts[wIdx][person] = (weekCounts[wIdx][person]||0)+1;
-                  weekCounts[wIdx][donor]  = (weekCounts[wIdx][donor]||0)-1;
-                  totalCounts[person]++; totalCounts[donor]--;
-                  if(isFridayKey(dayKey)){ fridayCounts[person]++; fridayCounts[donor]--; }
-                  moved = true;
-                  break;
-                }
-                if(moved) break;
-              }
-              if(moved) break;
-            }
-            if(!moved) break;
+    // --- Actions ---
+    
+    // Auth & Init
+    onAuthStateChanged(auth, async (user) => {
+      if(user) {
+        await bootstrap();
+        await loadUsers();
+        
+        // Restore session
+        const storedUid = localStorage.getItem("sched_uid");
+        if(storedUid && window.__USERS__) {
+          const u = window.__USERS__.find(x => x.id === storedUid);
+          if(u) {
+            startSession(u);
+            return;
           }
         }
+        
+        // Open modal if no session
+        els.modalId.style.display = "flex";
+      } else {
+        signInAnonymously(auth);
       }
+    });
 
-      // שלב 3: איזון שישי
-      let guard = 0;
-      while(guard++ < 40){
-        let maxP = peopleInGroup[0], minP = peopleInGroup[0];
-        for(const p of peopleInGroup){
-          if(fridayCounts[p] > fridayCounts[maxP]) maxP = p;
-          if(fridayCounts[p] < fridayCounts[minP]) minP = p;
-        }
-        if(fridayCounts[maxP] - fridayCounts[minP] <= 1) break;
-
-        const fridayKeysOfMax = allKeys.filter(k => assign[k]===maxP && isFridayKey(k));
-        let balanced = false;
-
-        for(const fk of fridayKeysOfMax){
-          const wf = weekIndexFor(new Date(fk), startDate);
-          const prefMin = prefVal(fk, minP);
-          if(!canAssign(minP, fk)) continue;
-          if(prefMin === 1 && hasOtherZero(fk, minP)) continue;
-
-          if((weekCounts[wf][minP]||0) < MIN_PER_PERSON){
-            assign[fk] = minP;
-            weekCounts[wf][minP] = (weekCounts[wf][minP]||0)+1;
-            weekCounts[wf][maxP] = (weekCounts[wf][maxP]||0)-1;
-            fridayCounts[minP]++; fridayCounts[maxP]--;
-            totalCounts[minP]++; totalCounts[maxP]--;
-            balanced = true;
-            break;
-          }
-
-          const minWeekdays = allKeys.filter(k => assign[k]===minP && !isFridayKey(k));
-          for(const day2 of minWeekdays){
-            const w2 = weekIndexFor(new Date(day2), startDate);
-            if(!canAssign(maxP, day2)) continue;
-            const prefMaxDay2 = prefVal(day2, maxP);
-            if(prefMaxDay2 === 1 && hasOtherZero(day2, maxP)) continue;
-            const maxWeekAfterFri = (weekCounts[wf][maxP]||0) - 1;
-            const minWeekAfterDay2 = (weekCounts[w2][minP]||0) - 1;
-            if(maxWeekAfterFri < MIN_PER_PERSON) continue;
-            if(minWeekAfterDay2 < MIN_PER_PERSON) continue;
-
-            assign[fk] = minP;
-            assign[day2] = maxP;
-            fridayCounts[minP]++; fridayCounts[maxP]--;
-            weekCounts[wf][minP] = (weekCounts[wf][minP]||0)+1;
-            weekCounts[wf][maxP] = (weekCounts[wf][maxP]||0)-1;
-            weekCounts[w2][maxP] = (weekCounts[w2][maxP]||0)+1;
-            weekCounts[w2][minP] = (weekCounts[w2][minP]||0)-1;
-            totalCounts[minP]++; totalCounts[maxP]--;
-            balanced = true;
-            break;
-          }
-          if(balanced) break;
-        }
-        if(!balanced) break;
-      }
-
-      return { assign, weekCounts, fridayCounts, totalCounts };
+    function startSession(user) {
+      activeUser = user;
+      localStorage.setItem("sched_uid", user.id);
+      els.whoami.textContent = `${user.name} (${user.role==='admin'?'מנהל':'עובד'})`;
+      els.adminBtn.style.display = user.role==='admin' ? 'inline-flex' : 'none';
+      
+      els.modalId.style.display = "none";
+      switchGroup(user.group);
+      toast(`שלום ${user.name}`);
     }
 
-    // ===== ICS / CSV / Share =====
-    function exportCSV(pack){
-      const gData = currentGroupData;
-      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
-      const weeks = gData?.horizonWeeks || 4;
-      const endDate = addDays(startDate, weeks*7 - 1);
-      const { assign } = pack;
-      const days = rangeDays(startDate, endDate);
-      const rows = [["תאריך","יום","משמרת","משובץ"]];
-      for(const d of days){
-        const sh = shiftForWeekday(d.getDay());
-        if(!sh) continue;
-        const key = fmtDateKey(d);
-        rows.push([fmtDM(d), hebDaysLong[d.getDay()], sh.label, assign[key]||""]);
+    // Event Listeners
+    els.startId.onclick = () => {
+      const uid = els.selectId.value;
+      const u = window.__USERS__.find(x => x.id === uid);
+      if(u) startSession(u);
+    };
+
+    els.switchUser.onclick = () => {
+      activeUser = null;
+      localStorage.removeItem("sched_uid");
+      location.reload();
+    };
+
+    els.save.onclick = saveMyConstraints;
+    els.reset.onclick = resetMyConstraints;
+    
+    els.compute.onclick = () => {
+      runCompute();
+      toast("השיבוץ חושב מחדש");
+    };
+
+    els.export.onclick = () => {
+      if(!lastComputedPack) return toast("אין נתונים ליצוא","warn");
+      const { assignment } = lastComputedPack;
+      let csv = "Date,Day,Shift,Person\n";
+      for(const [k,v] of Object.entries(assignment)) {
+        if(!v) continue;
+        const d = parseLocalDate(k);
+        const dayName = hebDaysShort[d.getDay()];
+        csv += `${k},${dayName},Shift,${v}\n`;
       }
-      const csv = rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\r\n");
-      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `schedule_${currentGroupId}.csv`;
-      a.click();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 300);
-      toast("CSV הופק והורד.","ok");
-    }
-    function pad(n){ return String(n).padStart(2,"0"); }
-    function toICSDateUTC(d, h, m){
-      const z = new Date(d); z.setUTCHours(h, m, 0, 0);
-      return `${z.getUTCFullYear()}${pad(z.getUTCMonth()+1)}${pad(z.getUTCDate())}T${pad(z.getUTCHours())}${pad(z.getUTCMinutes())}00Z`;
-    }
-    function downloadICSForMe(assign){
-      if(!activeUser){ toast("בחר משתמש קודם.","warn"); return; }
-      const gData = currentGroupData;
-      const startDate = startOfDay(new Date(gData?.startDate || new Date()));
-      const weeks = gData?.horizonWeeks || 4;
-      const endDate = addDays(startDate, weeks*7 - 1);
-      const days = rangeDays(startDate, endDate);
-      let ics = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Schedule//HE
-CALSCALE:GREGORIAN
-METHOD:PUBLISH
-`;
-      for(const d of days){
-        const sh = shiftForWeekday(d.getDay());
-        if(!sh) continue;
-        const key = fmtDateKey(d);
-        if(assign[key] !== activeUser.name) continue;
-        let st=[16,0], en=[22,0];
-        if(d.getDay()===5){ st=[8,0]; en=[14,0]; }
-        ics += `BEGIN:VEVENT
-UID:${key}-${activeUser.name}@schedule
-DTSTAMP:${toICSDateUTC(new Date(),0,0)}
-DTSTART:${toICSDateUTC(d,st[0],st[1])}
-DTEND:${toICSDateUTC(d,en[0],en[1])}
-SUMMARY:משמרת – ${activeUser.name}
-DESCRIPTION:חדר ${currentGroupId}
-LOCATION:סדנה
-END:VEVENT
-`;
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "schedule.csv";
+      link.click();
+    };
+
+    els.calendar.onclick = () => {
+      if(!lastComputedPack || !activeUser) return toast("אין נתונים","warn");
+      // Generate ICS for me
+      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//MySched//IL\n";
+      const { assignment } = lastComputedPack;
+      for(const [k,v] of Object.entries(assignment)) {
+        if(v !== activeUser.name) continue;
+        const d = parseLocalDate(k);
+        const isFri = d.getDay()===5;
+        const stH = isFri ? '08' : '16';
+        const enH = isFri ? '14' : '22';
+        const ds = k.replace(/-/g,''); // YYYYMMDD
+        ics += `BEGIN:VEVENT\nDTSTART:${ds}T${stH}0000\nDTEND:${ds}T${enH}0000\nSUMMARY:משמרת סדנה\nDESCRIPTION:חדר ${currentGroupData.name}\nEND:VEVENT\n`;
       }
       ics += "END:VCALENDAR";
-      const blob = new Blob([ics], {type:"text/calendar;charset=utf-8"});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `schedule_${currentGroupId}_${activeUser.name}.ics`;
-      a.click();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 300);
-      toast("קובץ iCalendar נוצר.","ok");
-    }
+      const blob = new Blob([ics], {type:"text/calendar;charset=utf-8;"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "myshifts.ics";
+      link.click();
+    };
 
-    // ===== lock helper =====
-    function isBoardLockedForUser(){
-      if(!currentGroupData) return false;
-      if(activeUser && activeUser.role === "admin") return false;
-      const lockStr = currentGroupData.lockedUntil;
-      if(!lockStr) return false;
-      const lockDate = new Date(lockStr+"T00:00:00");
-      return new Date() < lockDate;
-    }
+    // Theme Toggle
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+    els.themeBtn.innerHTML = savedTheme==='dark' ? '☀️' : '🌙';
+    
+    els.themeBtn.onclick = () => {
+      const curr = document.documentElement.getAttribute("data-theme");
+      const next = curr === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+      els.themeBtn.innerHTML = next==='dark' ? '☀️' : '🌙';
+    };
 
-    // ===== tabs =====
-    function renderTabs(selectedId){
-      bottomTabs.innerHTML = Object.keys(DEFAULT_GROUPS).map(g => {
-        const active = g === selectedId;
-        return `<div class="tab ${active?"active":""}" data-group="${g}">${g}</div>`;
-      }).join("");
-      bottomTabs.querySelectorAll(".tab").forEach(tab=>{
-        tab.addEventListener("click", async ()=>{
-          const g = tab.dataset.group;
-          currentGroupId = g;
-          await switchGroup(g);
-        });
-      });
-    }
+    // Admin
+    els.adminBtn.onclick = () => els.modalAdmin.style.display = "flex";
+    els.adminClose.onclick = () => els.modalAdmin.style.display = "none";
+    els.adminSave.onclick = async () => {
+      await setDoc(doc(db, "groups", currentGroupId), {
+        startDate: els.adminStart.value,
+        horizonWeeks: Number(els.adminHorizon.value),
+        lockedUntil: els.adminLock.value
+      }, { merge: true });
+      els.modalAdmin.style.display = "none";
+      toast("הגדרות נשמרו");
+      switchGroup(currentGroupId); // reload
+    };
 
-    async function switchGroup(groupId){
-      const gData = await ensureGroupDoc(groupId);
-      currentGroupData = gData;
-      scheduleTitle.textContent = "לוח שיבוצים – " + (gData.name || groupId);
-      lockBadge.style.display = isBoardLockedForUser() ? "inline-flex" : "none";
-
-      // מי האנשים בחדר
-      let groupPeople = gData.people;
-      if(!groupPeople || !Array.isArray(groupPeople) || !groupPeople.length){
-        const all = window.__ALL_USERS__ || [];
-        groupPeople = all.filter(u=>u.group===groupId).map(u=>u.name);
-      }
-      peopleInGroup = groupPeople || [];
-
-      renderPeopleChips();
-      await loadConstraintsForGroup(groupId, gData);
-      const pack = computeSchedule();
-      renderSchedule(pack);
-      renderSummary(pack);
-      renderTabs(groupId);
-
-      // תעדכן גם במודל ניהול
-      adminStartDate.value = gData.startDate || new Date().toISOString().slice(0,10);
-      adminHorizon.value = gData.horizonWeeks || 4;
-      adminLockUntil.value = gData.lockedUntil || "";
-    }
-
-    // ===== identity modal handlers =====
-    function showIdentityModal(){ identityBackdrop.style.display = "flex"; }
-    function hideIdentityModal(){ identityBackdrop.style.display = "none"; }
-
-    identityStartBtn.addEventListener("click", async ()=>{
-      const pickedId = identitySelect.value;
-      const usersArr = window.__ALL_USERS__ || [];
-      const user = usersArr.find(u => u.id === pickedId);
-      if(!user){
-        toast("לא מצאתי משתמש כזה.", "bad");
-        return;
-      }
-      activeUser = user;
-      currentGroupId = user.group;
-      localStorage.setItem("scheduler_user_id", user.id);
-      localStorage.setItem("scheduler_group_id", user.group);
-
-      await switchGroup(user.group);
-      whoamiEl.textContent = `אתה: ${user.name} (${user.group})${user.role==="admin"?" · מנהל":""}`;
-      hideIdentityModal();
-      toast("מחובר כ: " + user.name, "ok");
-    });
-
-    // ===== admin modal =====
-    adminBtn.addEventListener("click", ()=>{
-      if(!activeUser || activeUser.role!=="admin"){
-        toast("רק מנהל יכול לפתוח את זה.","warn");
-        return;
-      }
-      adminBackdrop.style.display="flex";
-    });
-    adminCloseBtn.addEventListener("click", ()=>{ adminBackdrop.style.display="none"; });
-    adminSaveBtn.addEventListener("click", async ()=>{
-      if(!activeUser || activeUser.role!=="admin"){ return; }
-      const payload = {
-        startDate: adminStartDate.value || new Date().toISOString().slice(0,10),
-        horizonWeeks: Number(adminHorizon.value)||4,
-        lockedUntil: adminLockUntil.value || ""
-      };
-      await setDoc(doc(db,"groups",currentGroupId), payload, {merge:true});
-      currentGroupData = { ...(currentGroupData||{}), ...payload };
-      adminBackdrop.style.display="none";
-      await switchGroup(currentGroupId);
-      toast("ההגדרות נשמרו.","ok");
-    });
-
-    // ===== buttons =====
-    saveBtn.addEventListener("click", saveConstraints);
-    resetMineBtn.addEventListener("click", resetConstraints);
-    computeBtn.addEventListener("click", ()=>{ const pack = computeSchedule(); renderSchedule(pack); renderSummary(pack); toast("שובץ מחדש.","ok"); });
-    exportBtn.addEventListener("click", ()=>{ const pack = computeSchedule(); exportCSV(pack); });
-    shareBtn.addEventListener("click", ()=>{
-      const u = new URL(location.href);
-      u.searchParams.set("view","1");
-      u.searchParams.set("group", currentGroupId);
-      window.open(u.toString(), "_blank");
-    });
-    addCalendarBtn.addEventListener("click", ()=>{ const pack = computeSchedule(); downloadICSForMe(pack.assign); });
-    switchUserBtn.addEventListener("click", async ()=>{
-      await signOut(auth);
-      activeUser = null;
-      whoamiEl.textContent = "לא מחובר";
-      showIdentityModal();
-    });
-
-    // ===== auth init =====
-    onAuthStateChanged(auth, async (user)=>{
-      if(user){
-        await bootstrapIfEmpty();
-        await loadAllUsers();
-        const savedUserId = localStorage.getItem("scheduler_user_id");
-        const savedGroupId = localStorage.getItem("scheduler_group_id");
-        const usersArr = window.__ALL_USERS__ || [];
-        const userObj = usersArr.find(u => u.id === savedUserId);
-        if(userObj){
-          activeUser = userObj;
-          currentGroupId = savedGroupId || userObj.group;
-          whoamiEl.textContent = `אתה: ${activeUser.name} (${activeUser.group})${activeUser.role==="admin"?" · מנהל":""}`;
-          await switchGroup(currentGroupId);
-        }else{
-          renderTabs(Object.keys(DEFAULT_GROUPS)[0]);
-          showIdentityModal();
-        }
-      }else{
-        await signInAnonymously(auth);
-      }
-    });
-
-    // ===== initial =====
-    renderTabs(Object.keys(DEFAULT_GROUPS)[0]);
-    // schedule placeholder
-    scheduleGrid.innerHTML = `<div class="slot"><div class="datebox">טוען...</div></div>`;
   </script>
 </body>
 </html>
