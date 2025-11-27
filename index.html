@@ -3,212 +3,233 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>מערכת שיבוצים - מלאה ויציבה</title>
+  <title>מערכת שיבוצים - עיצוב חדש</title>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0f172a; --card:#1e293b; --ink:#f8fafc; --muted:#94a3b8;
-      --border:#334155; --accent:#38bdf8; --accent2:#06b6d4;
-      --chip-bg:#0f172a; --pill-bg:#334155; --btn-ink:#0f172a;
-      --ok-bg:#052e16; --ok-br:#22c55e; --ok-ink:#bbf7d0;
-      --warn-bg:#422006; --warn-br:#ca8a04; --warn-ink:#fde047;
-      --bad-bg:#450a0a; --bad-br:#ef4444; --bad-ink:#fecaca;
-      --fri-bg:#172554; --fri-br:#1e40af;
-      --toast-bg:#1e293b; --toast-br:#475569; --toast-ink:#f1f5f9;
+      --bg:#0f1218; --card:#151a23; --ink:#e2e8f0; --muted:#94a3b8;
+      --border:#2a3441; --accent:#38bdf8;
+      --pill-bg:#1e293b; 
+      --ok-bg:#064e3b; --ok-txt:#6ee7b7;
+      --warn-bg:#451a03; --warn-txt:#fcd34d;
+      --bad-bg:#450a0a; --bad-txt:#fca5a5;
     }
     html[data-theme="light"]{
-      --bg:#f1f5f9; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
-      --border:#cbd5e1;
-      --chip-bg:#f8fafc; --pill-bg:#f1f5f9;
-      --ok-bg:#dcfce7; --ok-br:#22c55e; --ok-ink:#14532d;
-      --warn-bg:#fef9c3; --warn-br:#eab308; --warn-ink:#713f12;
-      --bad-bg:#fee2e2; --bad-br:#ef4444; --bad-ink:#7f1d1d;
-      --fri-bg:#eff6ff; --fri-br:#bfdbfe;
-      --toast-bg:#ffffff; --toast-br:#cbd5e1; --toast-ink:#0f172a;
+      --bg:#f8fafc; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+      --border:#cbd5e1; --pill-bg:#f1f5f9;
+      --ok-bg:#dcfce7; --ok-txt:#166534;
+      --warn-bg:#fef9c3; --warn-txt:#854d0e;
+      --bad-bg:#fee2e2; --bad-txt:#991b1b;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant",system-ui;padding-bottom:80px;overflow-y:scroll;}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant",system-ui;overflow-y:scroll;padding-bottom:100px;}
     
-    .app{max-width:1600px;margin:0 auto;padding:16px;}
+    .app{max-width:1800px;margin:0 auto;padding:20px;}
     
     /* Header */
-    header.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
-    .title{margin:0;font-size:26px;font-weight:800}
-    .sub{color:var(--muted);font-size:14px;margin-top:4px;display:block}
-    .header-actions{display:flex;gap:8px;align-items:center}
-    .id-badge{border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:13px;background:var(--card)}
+    header.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+    .title{margin:0;font-size:32px;font-weight:800;letter-spacing:-0.5px}
+    .sub{color:var(--muted);font-size:16px}
+    .header-left{display:flex;gap:12px;align-items:center}
     
-    /* Buttons */
-    button{cursor:pointer;border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-family:inherit;font-size:14px;transition:0.2s;}
-    button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--btn-ink)}
-    button.primary:hover{opacity:0.9;transform:translateY(-1px)}
+    .id-pill{background:var(--card);border:1px solid var(--border);padding:6px 16px;border-radius:99px;font-size:14px;font-weight:600}
+    button{cursor:pointer;border:none;border-radius:8px;padding:8px 16px;font-weight:700;font-family:inherit;transition:0.2s;font-size:14px}
     button.ghost{background:transparent;border:1px solid var(--border);color:var(--ink)}
-    button.ghost:hover{background:var(--pill-bg)}
-    .icon-btn{width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--ink)}
-    
-    /* Panels */
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
-    .panel .hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .panel .bd{padding:16px}
-    .split{display:grid;grid-template-columns:1fr 350px;gap:16px}
+    button.ghost:hover{background:var(--pill-bg);border-color:var(--muted)}
+    button.primary{background:var(--accent);color:#0f172a}
+    button.primary:hover{opacity:0.9}
+
+    /* Layout: 1/3 Right, 2/3 Left */
+    .split{
+      display:grid;
+      grid-template-columns: minmax(360px, 1fr) 2.5fr; /* 1/3 Constraints, 2/3 Schedule */
+      gap: 24px;
+      align-items:start;
+    }
     @media(max-width:1100px){.split{grid-template-columns:1fr}}
 
-    /* Schedule Grid */
-    .schedule-header{display:flex;gap:10px;align-items:center}
-    .schedule{display:grid;grid-template-columns:90px repeat(6, 1fr);gap:8px;overflow-x:auto}
-    @media(max-width:1200px){.schedule{min-width:800px}}
-    
-    .col-hd{text-align:center;color:var(--muted);font-size:13px;font-weight:700;padding-bottom:4px}
-    .row-label{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);text-align:center;line-height:1.2;border-right:3px solid var(--border);padding-right:8px}
-    
-    .slot{background:var(--bg);border:1px solid var(--border);border-radius:12px;min-height:90px;padding:8px;display:flex;flex-direction:column;gap:6px;position:relative}
-    .slot.fri{background:var(--fri-bg);border-color:var(--fri-br)}
-    
-    .datebox{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:2px}
-    .d-top{font-weight:700;color:var(--ink)}
-    
-    .pill{display:inline-flex;gap:4px;align-items:center;border-radius:6px;padding:2px 8px;border:1px solid var(--border);background:var(--pill-bg);font-size:12px;width:fit-content}
-    .pill.ok{background:var(--ok-bg);border-color:var(--ok-br);color:var(--ok-ink)}
-    .pill.bad{background:var(--bad-bg);border-color:var(--bad-br);color:var(--bad-ink)}
-    .pill.warn{background:var(--warn-bg);border-color:var(--warn-br);color:var(--warn-ink)}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
+    .panel .hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .panel .bd{padding:20px}
 
-    /* Days & Chips */
-    .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    .day{background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:8px;min-height:50px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px;font-size:13px;transition:0.1s;user-select:none}
-    .day:hover{border-color:var(--accent)}
-    .day.state-1{background:var(--warn-bg);border-color:var(--warn-br);border-style:solid}
-    .day.state-2{background:var(--bad-bg);border-color:var(--bad-br);border-style:solid}
-    .day.shabbat{opacity:.3;cursor:not-allowed;background:var(--pill-bg)}
+    /* Constraints Side (Right) */
+    .constraints-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px}
+    .day-cell{
+      aspect-ratio:1/1;
+      background:var(--bg);border:1px solid var(--border);
+      border-radius:8px;
+      display:flex;flex-direction:column;justify-content:center;align-items:center;
+      cursor:pointer;transition:0.1s;position:relative;
+    }
+    .day-cell:hover{border-color:var(--accent)}
+    .day-cell.shabbat{opacity:0.3;pointer-events:none;background:var(--pill-bg)}
+    .day-cell.s-0{/*Available*/}
+    .day-cell.s-1{background:var(--warn-bg);border-color:var(--warn-txt);color:var(--warn-txt)}
+    .day-cell.s-2{background:var(--bad-bg);border-color:var(--bad-txt);color:var(--bad-txt)}
     
-    .legend{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-bottom:8px}
-    .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-inline-end:4px}
-    .dot.bg0{background:var(--bg);border:1px dashed var(--muted)}
-    .dot.bg1{background:var(--warn-br)}
-    .dot.bg2{background:var(--bad-br)}
+    .d-num{font-size:18px;font-weight:700}
+    .d-name{font-size:12px;color:var(--muted)}
 
-    .chip{background:var(--chip-bg);border:1px solid var(--border);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:13px;transition:0.2s;display:inline-block;margin:2px}
-    .chip:hover{background:var(--pill-bg)}
-    .chip.active{background:var(--accent);color:var(--btn-ink);border-color:var(--accent);font-weight:700}
+    .legend{display:flex;gap:16px;justify-content:center;margin-bottom:16px;font-size:13px}
+    .l-item{display:flex;align-items:center;gap:6px}
+    .dot{width:10px;height:10px;border-radius:50%}
 
-    /* Modals & Toasts */
-    .toast-wrap{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-    .toast{pointer-events:all;background:var(--toast-bg);border:1px solid var(--toast-br);color:var(--toast-ink);padding:10px 16px;border-radius:12px;display:flex;align-items:center;box-shadow:0 10px 40px rgba(0,0,0,0.3);min-width:300px;animation:slideUp 0.3s}
-    @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    /* Schedule Side (Left) */
+    .schedule-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .shift-card{
+      background:var(--bg);border:1px solid var(--border);
+      border-radius:12px;padding:12px;
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .shift-card.fri{background:rgba(56, 189, 248, 0.05);border-color:rgba(56, 189, 248, 0.2)}
     
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9999}
-    .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:400px;width:90%;padding:24px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.4)}
-    input, select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--ink);font-family:inherit;outline:none;font-size:16px}
+    .sc-header{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:2px}
+    .sc-day{font-weight:700;color:var(--ink);font-size:15px}
     
-    .bottom-tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;gap:8px;padding:10px 16px;overflow-x:auto;z-index:500}
-    .tab{padding:6px 14px;border-radius:999px;border:1px solid transparent;color:var(--muted);white-space:nowrap;cursor:pointer;font-size:14px;transition:0.2s}
-    .tab.active{background:var(--accent);color:var(--btn-ink);font-weight:700}
-    .admin-bar{position:fixed;left:16px;top:16px;z-index:10001}
+    .assigned-pill{
+      background:var(--pill-bg);color:var(--muted);
+      text-align:center;padding:8px;border-radius:8px;font-weight:600;font-size:14px;
+      border:1px dashed var(--border);
+    }
+    .assigned-pill.filled{
+      background:var(--ok-bg);color:var(--ok-txt);border:1px solid var(--ok-txt);
+    }
+    
+    .mini-status{display:flex;gap:4px;font-size:11px}
+    .stat{padding:2px 6px;border-radius:4px;background:var(--pill-bg)}
+
+    /* Bottom Tabs */
+    .tabs-bar{
+      position:fixed;bottom:0;left:0;right:0;
+      background:var(--card);border-top:1px solid var(--border);
+      display:flex;justify-content:center;gap:8px;padding:12px;z-index:100;
+    }
+    .tab{
+      padding:10px 24px;border-radius:12px;background:var(--bg);border:1px solid var(--border);
+      color:var(--muted);cursor:pointer;font-weight:700;transition:0.2s;
+    }
+    .tab:hover{background:var(--pill-bg)}
+    .tab.active{background:var(--accent);color:#0f172a;border-color:var(--accent);transform:translateY(-2px)}
+
+    /* Modals & Utils */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(5px);z-index:9999;display:none;align-items:center;justify-content:center}
+    .modal{background:var(--card);width:90%;max-width:420px;padding:30px;border-radius:24px;border:1px solid var(--border);text-align:center}
+    select, input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--ink);font-family:inherit;margin:10px 0;font-size:16px}
+
+    .toast-wrap{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:10000}
+    .toast{background:var(--card);border:1px solid var(--border);padding:10px 20px;border-radius:99px;margin-bottom:8px;box-shadow:0 10px 30px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;animation:fade 0.3s}
+    @keyframes fade{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
-  
-  <div class="admin-bar">
-    <button id="adminBtn" class="icon-btn" title="פאנל ניהול" style="display:none">⚙️</button>
+
+<div class="app">
+  <header class="header">
+    <div>
+      <h1 class="title">לוח שיבוצים</h1>
+      <div class="sub" id="groupSubtitle">טוען...</div>
+    </div>
+    <div class="header-left">
+      <div id="whoami" class="id-pill">אורח</div>
+      <button class="ghost" onclick="logout()">החלף משתמש</button>
+      <button class="ghost" id="adminBtn" style="display:none">⚙️</button>
+    </div>
+  </header>
+
+  <!-- Main Layout: Constraints (Right) | Schedule (Left) -->
+  <main class="split">
+    
+    <!-- Right Panel: Constraints & Selection (1/3) -->
+    <section class="panel">
+      <div class="hd">
+        <h3>אילוצים לחודש קדימה</h3>
+      </div>
+      <div class="bd">
+        <div class="legend">
+          <div class="l-item"><span class="dot" style="border:1px dashed #666"></span> זמין</div>
+          <div class="l-item"><span class="dot" style="background:var(--warn-txt)"></span> מעדיף שלא</div>
+          <div class="l-item"><span class="dot" style="background:var(--bad-txt)"></span> לא זמין</div>
+        </div>
+
+        <!-- Month Grid -->
+        <div id="daysGrid" class="constraints-grid"></div>
+
+        <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:12px">
+          לחץ על יום כדי לשנות סטטוס
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <button class="primary" id="saveBtn" style="flex:1">שמור אילוצים</button>
+          <button class="ghost" id="resetBtn">אפס</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Left Panel: Schedule Display (2/3) -->
+    <section class="panel">
+      <div class="hd">
+        <div style="display:flex;align-items:center;gap:12px">
+          <h3>לוח שיבוצים</h3>
+          <span id="lockBadge" style="font-size:12px;background:var(--bad-bg);color:var(--bad-txt);padding:2px 8px;border-radius:4px;display:none">🔒 נעול</span>
+        </div>
+        <div style="display:flex;gap:8px">
+           <button class="ghost" id="computeBtn">⚡ חשב שיבוץ</button>
+           <button class="ghost" id="exportBtn">📥 CSV</button>
+        </div>
+      </div>
+      <div class="bd">
+        <div id="scheduleGrid" class="schedule-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">בחר קבוצה למטה כדי לטעון נתונים</div>
+        </div>
+        <div id="summaryBox" style="margin-top:20px;border-top:1px solid var(--border);padding-top:20px"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Bottom Tabs -->
+<div id="bottomTabs" class="tabs-bar"></div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal-backdrop" style="display:flex">
+  <div class="modal">
+    <h2>היי, מי את/ה?</h2>
+    <p style="color:var(--muted)">בחר את השם שלך כדי להתחבר למערכת</p>
+    <select id="userSelect"><option>טוען רשימה...</option></select>
+    <button class="primary" style="width:100%;margin-top:10px" onclick="doLogin()">התחל לעבוד</button>
   </div>
+</div>
 
-  <div class="app">
-    <header class="header">
-      <div>
-        <h1 class="title">לוח שיבוצים</h1>
-        <span class="sub">ניהול משמרות סדנה</span>
-      </div>
-      <div class="header-actions">
-        <span id="whoami" class="id-badge">לא מחובר</span>
-        <button id="switchUserBtn" class="ghost">יציאה</button>
-        <button id="themeBtn" class="icon-btn">🌙</button>
-      </div>
-    </header>
-
-    <main class="split">
-      <section class="panel">
-        <div class="hd">
-          <div class="schedule-header">
-            <h3 style="margin:0" id="scheduleTitle">טוען...</h3>
-            <span id="dateRangeBadge" class="badge" style="border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:12px"></span>
-            <span id="lockBadge" class="badge" style="background:var(--bad-bg);color:var(--bad-ink);padding:2px 8px;border-radius:4px;font-size:12px;display:none;">🔒 נעול</span>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button id="computeBtn" class="ghost">⚡ חשב</button>
-            <button id="exportBtn" class="ghost">📥 CSV</button>
-          </div>
-        </div>
-        <div class="bd">
-          <div id="scheduleGrid" class="schedule"></div>
-          <div id="summaryBox" style="margin-top:16px"></div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="hd"><h3 style="margin:0">האילוצים שלי</h3></div>
-        <div class="bd">
-          <div id="peopleChips" style="margin-bottom:12px"></div>
-          <div class="legend">
-            <span><span class="dot bg0"></span>זמין</span>
-            <span><span class="dot bg1"></span>מעדיף שלא</span>
-            <span><span class="dot bg2"></span>לא יכול</span>
-          </div>
-          <div id="daysGrid" class="days" style="margin-bottom:16px"></div>
-          <div style="display:flex;gap:8px;flex-direction:column">
-            <button id="saveBtn" class="primary" style="width:100%">💾 שמור שינויים</button>
-            <button id="resetMineBtn" class="ghost" style="width:100%">נקה אילוצים</button>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div id="bottomTabs" class="bottom-tabs"></div>
-
-  <!-- Login Modal -->
-  <div id="identityBackdrop" class="modal-backdrop" style="display:none">
-    <div class="modal">
-      <h2>התחברות</h2>
-      <p style="color:var(--muted);margin-bottom:16px">בחר את השם שלך כדי להתחיל.</p>
-      <div style="margin-bottom:16px">
-        <select id="identitySelect"><option>טוען רשימה...</option></select>
-      </div>
-      <button id="identityStartBtn" class="primary" style="width:100%">התחל</button>
+<!-- Admin Modal -->
+<div id="adminModal" class="modal-backdrop">
+  <div class="modal">
+    <h3>הגדרות ניהול</h3>
+    <label>תאריך התחלה (יום א')</label>
+    <input type="date" id="admStart">
+    <label>מספר שבועות</label>
+    <input type="number" id="admWeeks" value="4">
+    <label>נעילה עד תאריך</label>
+    <input type="date" id="admLock">
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="ghost" style="flex:1" onclick="document.getElementById('adminModal').style.display='none'">ביטול</button>
+      <button class="primary" style="flex:1" id="admSave">שמור</button>
     </div>
   </div>
+</div>
 
-  <!-- Admin Modal -->
-  <div id="adminBackdrop" class="modal-backdrop">
-    <div class="modal">
-      <h2>הגדרות מנהל</h2>
-      <div style="margin-bottom:12px">
-        <label>תאריך התחלה</label>
-        <input id="adminStartDate" type="date">
-      </div>
-      <div style="margin-bottom:12px">
-        <label>שבועות קדימה</label>
-        <input id="adminHorizon" type="number" min="1" max="8">
-      </div>
-      <div style="margin-bottom:12px">
-        <label>נעול עד</label>
-        <input id="adminLockUntil" type="date">
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
-        <button id="adminCloseBtn" class="ghost">ביטול</button>
-        <button id="adminSaveBtn" class="primary">שמור</button>
-      </div>
-    </div>
-  </div>
+<div id="toastWrap" class="toast-wrap"></div>
 
-  <div id="toastWrap" class="toast-wrap"></div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, getDocs, collection, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-  <!-- MAIN SCRIPT -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, getDocs, collection, deleteField, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
-    // 1. CONFIGURATION
-    const firebaseConfig = {
+  const firebaseConfig = {
       apiKey: "AIzaSyBiZIHRpbg0bq4VFZ2kDDXj6QeRJZpjOpg",
       authDomain: "sadna-timetable.firebaseapp.com",
       projectId: "sadna-timetable",
@@ -216,411 +237,332 @@
       messagingSenderId: "605203492621",
       appId: "1:605203492621:web:7ed83f0e5e64d67b9c8a44",
       measurementId: "G-8941L7ZZJ6"
-    };
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    // 2. DATA CONSTANTS (Defaults / Offline)
-    const DEFAULT_GROUPS = {
-      "מדפסות": { name: "מדפסות", people: ["נבו","נטע","טל"], horizonWeeks: 4 },
-      "תפירה": { name: "תפירה", people: ["כליל","עמית","שירה"], horizonWeeks: 4 },
-      "מתכת": { name: "מתכת", people: ["מאי"], horizonWeeks: 4 },
-      "עיבוד שבבים": { name: "עיבוד שבבים", people: ["ליעד"], horizonWeeks: 4 },
-      "עץ": { name: "עץ", people: ["אורי"], horizonWeeks: 4 }
-    };
+  // --- CONFIG ---
+  const GROUPS = ["מדפסות", "תפירה", "מתכת", "עיבוד שבבים", "עץ"];
+  const USERS_DB = [
+    {id:"u1", name:"נבו", group:"מדפסות", role:"admin"},
+    {id:"u2", name:"נטע", group:"מדפסות", role:"user"},
+    {id:"u3", name:"טל", group:"מדפסות", role:"user"},
+    {id:"u4", name:"כליל", group:"תפירה", role:"user"},
+    {id:"u5", name:"עמית", group:"תפירה", role:"user"},
+    {id:"u6", name:"שירה", group:"תפירה", role:"user"},
+    {id:"u7", name:"מאי", group:"מתכת", role:"user"},
+    {id:"u8", name:"ליעד", group:"עיבוד שבבים", role:"user"},
+    {id:"u9", name:"אורי", group:"עץ", role:"user"}
+  ];
 
-    const DEFAULT_USERS = [
-      { id: "u-navo", name: "נבו", group: "מדפסות", role: "admin" },
-      { id: "u-neta", name: "נטע", group: "מדפסות", role: "user" },
-      { id: "u-tal",  name: "טל",  group: "מדפסות", role: "user" },
-      { id: "u-klil", name: "כליל", group: "תפירה", role: "user" },
-      { id: "u-amit", name: "עמית", group: "תפירה", role: "user" },
-      { id: "u-shira",name: "שירה", group: "תפירה", role: "user" },
-      { id: "u-mai",  name: "מאי", group: "מתכת", role: "user" },
-      { id: "u-liad", name: "ליעד", group: "עיבוד שבבים", role: "user" },
-      { id: "u-uri",  name: "אורי", group: "עץ", role: "user" }
-    ];
+  // --- STATE ---
+  let activeUser = null;
+  let currentGroup = null;
+  let groupData = null; // {startDate, weeks, lockedUntil, people}
+  let constraints = {}; // { date: {Name: 0/1/2} }
+  let unsub = null;
 
-    // 3. STATE
-    let activeUser = null;
-    let currentGroupId = null;
-    let currentGroupData = null;
-    let state = {}; 
-    let peopleInGroup = [];
-    let unsubConstraints = null;
-    let lastComputedPack = null;
-    let allUsersCache = [];
-    const MS_DAY = 86400000;
-    const hebDaysShort = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
+  // --- HELPERS ---
+  const qs = s => document.querySelector(s);
+  const fmtDate = d => `${d.getDate()}.${d.getMonth()+1}`;
+  const toKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const parseKey = s => { const [y,m,d]=s.split('-'); return new Date(y,m-1,d); };
+  const addDays = (d,n) => new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
 
-    // 4. HELPERS
-    function parseLocalDate(str) {
-      if(!str) return new Date();
-      const [y,m,d] = str.split('-').map(Number);
-      return new Date(y, m-1, d, 0, 0, 0, 0);
-    }
-    function fmtDateKey(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,'0');
-      const day = String(d.getDate()).padStart(2,'0');
-      return `${y}-${m}-${day}`;
-    }
-    function fmtDM(d) { return `${d.getDate()}.${d.getMonth()+1}`; }
-    function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
-    function rangeDays(start, end) {
-      const arr=[];
-      let c = new Date(start);
-      while(c <= end) { arr.push(new Date(c)); c = addDays(c,1); }
-      return arr;
-    }
-    function toast(msg, type="ok") {
-      const t = document.createElement("div");
-      t.className = `toast`;
-      let icon = type==="ok"?"✅":type==="warn"?"⚠️":"❌";
-      t.innerHTML = `<div><span style="margin-inline-end:8px">${icon}</span>${msg}</div>`;
-      document.getElementById("toastWrap").appendChild(t);
-      setTimeout(() => { t.style.opacity="0"; setTimeout(()=>t.remove(),300); }, 3000);
-    }
+  function toast(msg, ok=true) {
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.innerHTML = `<span style="font-size:18px">${ok?'✅':'⚠️'}</span> ${msg}`;
+    qs("#toastWrap").appendChild(t);
+    setTimeout(()=>t.remove(), 3000);
+  }
 
-    // 5. APP LOGIC
-    async function initApp() {
-      // 1. Get Users (Fail-safe)
-      try {
-        const snap = await getDocs(collection(db, "users"));
-        if(!snap.empty) {
-          allUsersCache = [];
-          snap.forEach(d => allUsersCache.push({id:d.id, ...d.data()}));
-        } else {
-          throw new Error("Empty DB");
-        }
-      } catch(e) {
-        console.warn("Loading offline users", e);
-        allUsersCache = DEFAULT_USERS;
-        // Seed if possible
-        try {
-           const batch = writeBatch(db);
-           DEFAULT_USERS.forEach(u => batch.set(doc(db,"users",u.id), u));
-           await batch.commit();
-        } catch(e2){}
+  // --- INIT ---
+  async function init() {
+    // 1. Populate Login
+    const sel = qs("#userSelect");
+    sel.innerHTML = USERS_DB.map(u => `<option value="${u.id}">${u.name} (${u.group})</option>`).join("");
+    
+    // 2. Check Session
+    const saved = localStorage.getItem("uid");
+    if(saved) {
+      const u = USERS_DB.find(x=>x.id===saved);
+      if(u) {
+        activeUser = u;
+        qs("#loginModal").style.display="none";
+        renderApp();
+        switchTab(u.group);
+        return;
       }
-
-      // Populate Select
-      const sel = document.getElementById("identitySelect");
-      sel.innerHTML = allUsersCache.map(u => `<option value="${u.id}">${u.name} (${u.group})</option>`).join("");
-
-      // Auto Login
-      const savedUid = localStorage.getItem("sched_uid");
-      if(savedUid) {
-        const found = allUsersCache.find(u => u.id === savedUid);
-        if(found) {
-           doLogin(found);
-           return;
-        }
-      }
-      document.getElementById("identityBackdrop").style.display = "flex";
     }
+    qs("#loginModal").style.display="flex";
+  }
 
-    async function doLogin(user) {
-      activeUser = user;
-      localStorage.setItem("sched_uid", user.id);
-      
-      document.getElementById("whoami").textContent = `${user.name}`;
-      document.getElementById("adminBtn").style.display = user.role === 'admin' ? 'inline-flex' : 'none';
-      
-      await switchGroup(user.group);
-      document.getElementById("identityBackdrop").style.display = "none";
-      toast("התחברת בהצלחה");
+  window.doLogin = () => {
+    const uid = qs("#userSelect").value;
+    const u = USERS_DB.find(x=>x.id===uid);
+    if(u) {
+      localStorage.setItem("uid", u.id);
+      activeUser = u;
+      qs("#loginModal").style.display="none";
+      renderApp();
+      switchTab(u.group);
     }
+  };
+  window.logout = () => { localStorage.removeItem("uid"); location.reload(); };
 
-    async function switchGroup(groupId) {
-      currentGroupId = groupId;
-      
-      // Default Data + Ensure valid start date
-      let finalData = DEFAULT_GROUPS[groupId] || { name: groupId, people: [], horizonWeeks: 4 };
-      // Always fallback to today if DB date is missing
-      finalData.startDate = fmtDateKey(new Date()); 
+  function renderApp() {
+    qs("#whoami").textContent = `${activeUser.name} (${activeUser.role==='admin'?'מנהל':'עובד'})`;
+    if(activeUser.role==='admin') qs("#adminBtn").style.display="block";
+    
+    // Render Tabs
+    qs("#bottomTabs").innerHTML = GROUPS.map(g => 
+      `<div class="tab" id="tab-${g}" onclick="switchTab('${g}')">${g}</div>`
+    ).join("");
+  }
 
-      // Try DB Fetch
-      try {
-        const snap = await getDoc(doc(db, "groups", groupId));
-        if(snap.exists()) {
-          const dbData = snap.data();
-          if(dbData.startDate) finalData.startDate = dbData.startDate;
-          if(dbData.horizonWeeks) finalData.horizonWeeks = dbData.horizonWeeks;
-          if(dbData.lockedUntil) finalData.lockedUntil = dbData.lockedUntil;
-          if(dbData.people) finalData.people = dbData.people;
-          if(dbData.name) finalData.name = dbData.name;
-        } else {
-          // Create missing doc silently
-          setDoc(doc(db, "groups", groupId), finalData, {merge:true}).catch(e=>{});
-        }
-      } catch(e) {
-        console.error("Group load failed, using default", e);
-      }
+  // --- CORE LOGIC: SWITCH GROUP ---
+  window.switchTab = async (groupName) => {
+    // 1. UI Updates
+    document.querySelectorAll(".tab").forEach(e=>e.classList.remove("active"));
+    qs(`#tab-${groupName}`).classList.add("active");
+    qs("#groupSubtitle").textContent = `מציג נתונים עבור: ${groupName}`;
+    qs("#scheduleGrid").innerHTML = `<div style="text-align:center;grid-column:1/-1;padding:40px">טוען נתונים...</div>`;
+    qs("#daysGrid").innerHTML = ""; // Clear constraints
 
-      currentGroupData = finalData;
-      
-      // Determine People
-      let pList = finalData.people || [];
-      if(!pList.length) pList = allUsersCache.filter(u => u.group === groupId).map(u => u.name);
-      peopleInGroup = pList;
+    currentGroup = groupName;
+    if(unsub) unsub(); // Stop listening to old group
 
-      // Update UI
-      document.getElementById("scheduleTitle").textContent = `לוח שיבוצים – ${finalData.name}`;
-      renderTabs();
-      renderChips();
+    // 2. Fetch Group Config
+    let gDoc = await getDoc(doc(db, "groups", groupName));
+    let data = gDoc.exists() ? gDoc.data() : null;
 
-      document.getElementById("adminStartDate").value = finalData.startDate;
-      document.getElementById("adminHorizon").value = finalData.horizonWeeks;
-      document.getElementById("adminLockUntil").value = finalData.lockedUntil || "";
-
-      // Load Constraints
-      if(unsubConstraints) unsubConstraints();
-      state = {};
-      renderCalendar(); // clear old
-      runCompute(); // run empty compute to clear schedule
-
-      // Live Listener
-      try {
-        const startDate = parseLocalDate(finalData.startDate);
-        const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}`;
-        const q = collection(db, "groups", groupId, "constraints", monthKey, "days");
-        
-        unsubConstraints = onSnapshot(q, (ss) => {
-          ss.docChanges().forEach(ch => {
-            if(ch.type==="removed") delete state[ch.doc.id];
-            else state[ch.doc.id] = ch.doc.data();
-          });
-          renderCalendar();
-          runCompute();
-        }, (err) => {
-          console.warn("Live sync failed", err);
-        });
-      } catch(e) { console.warn("Snapshot init failed", e); }
+    // If missing, create default
+    if(!data) {
+      data = {
+        startDate: toKey(new Date()),
+        horizonWeeks: 4,
+        lockedUntil: ""
+      };
+      await setDoc(doc(db, "groups", groupName), data, {merge:true});
     }
+    
+    // Determine people (filter from static DB based on group)
+    const people = USERS_DB.filter(u => u.group === groupName).map(u => u.name);
+    groupData = { ...data, people };
 
-    // 6. RENDERERS
-    function renderTabs() {
-      const div = document.getElementById("bottomTabs");
-      div.innerHTML = Object.keys(DEFAULT_GROUPS).map(k => 
-        `<div class="tab ${k===currentGroupId?'active':''}" onclick="changeGroup('${k}')">${k}</div>`
-      ).join("");
-    }
-    window.changeGroup = (g) => switchGroup(g);
+    // Admin Inputs
+    qs("#admStart").value = data.startDate;
+    qs("#admWeeks").value = data.horizonWeeks;
+    qs("#admLock").value = data.lockedUntil;
 
-    function renderChips() {
-      const div = document.getElementById("peopleChips");
-      div.innerHTML = peopleInGroup.map(p => 
-        `<div class="chip ${activeUser&&activeUser.name===p?'active':''}" onclick="impersonate('${p}')">${p}</div>`
-      ).join("");
-    }
-    window.impersonate = (p) => {
-      if(activeUser && activeUser.role === 'admin') {
-        activeUser = {...activeUser, name:p};
-        renderChips(); renderCalendar(); toast(`עורך כ: ${p}`);
-      }
-    };
-
-    function renderCalendar() {
-      if(!currentGroupData) return;
-      const startDate = parseLocalDate(currentGroupData.startDate);
-      const weeks = Number(currentGroupData.horizonWeeks);
-      const endDate = addDays(startDate, weeks*7 - 1);
-      
-      document.getElementById("dateRangeBadge").textContent = `${fmtDM(startDate)} – ${fmtDM(endDate)}`;
-      const locked = currentGroupData.lockedUntil && new Date() < parseLocalDate(currentGroupData.lockedUntil);
-      document.getElementById("lockBadge").style.display = locked ? "inline-block" : "none";
-
-      const grid = document.getElementById("daysGrid");
-      grid.innerHTML = rangeDays(startDate, endDate).map(d => {
-        const k = fmtDateKey(d);
-        const day = d.getDay();
-        const isShabbat = day===6;
-        let val = 0;
-        if(activeUser && state[k]) val = state[k][activeUser.name] || 0;
-        
-        return `<div class="day state-${val} ${isShabbat?'shabbat':''}" onclick="toggleDay('${k}', ${isShabbat})">
-          <div>${hebDaysShort[day]} ${fmtDM(d)}</div>
-        </div>`;
-      }).join("");
-    }
-
-    window.toggleDay = (k, isShabbat) => {
-      if(isShabbat || !activeUser) return;
-      const locked = currentGroupData.lockedUntil && new Date() < parseLocalDate(currentGroupData.lockedUntil);
-      if(locked && activeUser.role !== 'admin') return toast("הלוח נעול","warn");
-      
-      if(!state[k]) state[k]={};
-      state[k][activeUser.name] = ((state[k][activeUser.name]||0)+1)%3;
-      renderCalendar();
-    };
-
-    // 7. COMPUTE ALGORITHM
-    function runCompute() {
-      if(!currentGroupData) return;
-      const startDate = parseLocalDate(currentGroupData.startDate);
-      const weeks = Number(currentGroupData.horizonWeeks);
-      const endDate = addDays(startDate, weeks*7 - 1);
-      const allDays = rangeDays(startDate, endDate);
-
-      const counters = { total:{}, week:[], friday:{} };
-      peopleInGroup.forEach(p => { counters.total[p]=0; counters.friday[p]=0; });
-      for(let i=0; i<weeks; i++) { 
-        counters.week[i]={}; peopleInGroup.forEach(p=>counters.week[i][p]=0); 
-      }
-
-      const assignment = {};
-      const getPref = (k,p) => (state[k] && state[k][p]!==undefined) ? state[k][p] : 0;
-
-      allDays.forEach(d => {
-        const day = d.getDay();
-        if(day===6) return;
-        const k = fmtDateKey(d);
-        const wIdx = Math.floor((d - startDate)/(7*MS_DAY));
-        if(wIdx >= weeks) return;
-
-        let candidates = peopleInGroup.filter(p => getPref(k,p) !== 2);
-        const avail = candidates.filter(p => getPref(k,p) === 0);
-        if(avail.length) candidates = avail;
-
-        if(candidates.length) {
-          candidates.sort((a,b) => {
-            if(day===5) { // Friday fairness
-               if(counters.friday[a] !== counters.friday[b]) return counters.friday[a]-counters.friday[b];
-            }
-            if(counters.week[wIdx][a] !== counters.week[wIdx][b]) return counters.week[wIdx][a]-counters.week[wIdx][b];
-            return counters.total[a]-counters.total[b];
-          });
-          const win = candidates[0];
-          assignment[k] = win;
-          counters.total[win]++;
-          counters.week[wIdx][win]++;
-          if(day===5) counters.friday[win]++;
-        } else {
-          assignment[k] = null;
-        }
-      });
-      lastComputedPack = { assignment, counters, weeks, startDate };
-      renderSchedule();
-      renderSummary();
-    }
-
-    function renderSchedule() {
-      if(!lastComputedPack) return;
-      const { assignment, weeks, startDate } = lastComputedPack;
-      let html = `<div class="col-hd"></div>` + [0,1,2,3,4,5].map(i=>`<div class="col-hd">${hebDaysShort[i]}</div>`).join("");
-      
-      for(let w=0; w<weeks; w++) {
-        const sun = addDays(startDate, w*7);
-        html += `<div class="row-label">${fmtDM(sun)}-${fmtDM(addDays(sun,6))}</div>`;
-        for(let d=0; d<6; d++) {
-          const curr = addDays(sun, d);
-          const k = fmtDateKey(curr);
-          const win = assignment[k];
-          const prefs = state[k]||{};
-          const warn = peopleInGroup.filter(p=>prefs[p]===1).length;
-          const bad = peopleInGroup.filter(p=>prefs[p]===2).length;
-
-          html += `<div class="slot ${d===5?'fri':''}">
-            <div class="datebox"><span class="d-top">${hebDaysShort[d]}</span><span>${d===5?'08:00':'16:00'}</span></div>
-            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:2px">
-              ${win ? `<div class="pill ok"><b>${win}</b></div>` : `<div class="pill bad">ריק</div>`}
-              <div style="display:flex;gap:2px">
-                ${warn?`<span class="pill warn" style="font-size:10px">${warn}⚠️</span>`:''}
-                ${bad?`<span class="pill bad" style="font-size:10px">${bad}⛔</span>`:''}
-              </div>
-            </div>
-          </div>`;
-        }
-      }
-      document.getElementById("scheduleGrid").innerHTML = html;
-    }
-
-    function renderSummary() {
-      if(!lastComputedPack) return;
-      const { counters, weeks } = lastComputedPack;
-      let html = `<table style="width:100%;font-size:13px;text-align:center"><thead><tr><th>שם</th>`;
-      for(let i=0; i<weeks; i++) html+=`<th>שב׳ ${i+1}</th>`;
-      html += `<th>שישי</th><th>סה״כ</th></tr></thead><tbody>`;
-      
-      peopleInGroup.forEach(p => {
-        html += `<tr><td style="text-align:right">${p}</td>`;
-        for(let i=0; i<weeks; i++) html+=`<td>${counters.week[i][p]}</td>`;
-        html += `<td>${counters.friday[p]}</td><td style="font-weight:bold">${counters.total[p]}</td></tr>`;
-      });
-      document.getElementById("summaryBox").innerHTML = html + "</tbody></table>";
-    }
-
-    // 8. EVENTS
-    document.getElementById("identityStartBtn").onclick = () => {
-      const uid = document.getElementById("identitySelect").value;
-      const u = allUsersCache.find(x => x.id === uid);
-      if(u) doLogin(u);
-    };
-    document.getElementById("switchUserBtn").onclick = () => { localStorage.removeItem("sched_uid"); location.reload(); };
-    document.getElementById("saveBtn").onclick = async () => {
-      if(!activeUser) return;
-      const startDate = parseLocalDate(currentGroupData.startDate);
-      const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}`;
-      const batch = writeBatch(db);
-      let c=0;
-      for(const [k,v] of Object.entries(state)) {
-        if(v[activeUser.name]!==undefined) {
-          batch.set(doc(db,"groups",currentGroupId,"constraints",monthKey,"days",k), 
-             {[activeUser.name]:v[activeUser.name]}, {merge:true});
-          c++;
-        }
-      }
-      if(c>0) { await batch.commit(); toast("נשמר בהצלחה"); } 
-      else toast("אין שינויים");
-    };
-    document.getElementById("resetMineBtn").onclick = async () => {
-       if(!activeUser || !confirm("לנקות את כל האילוצים שלך מהמסך?")) return;
-       renderCalendar();
-    };
-    document.getElementById("computeBtn").onclick = () => { runCompute(); toast("חושב..."); };
-    document.getElementById("exportBtn").onclick = () => {
-      if(!lastComputedPack) return toast("אין נתונים","warn");
-      const { assignment } = lastComputedPack;
-      let csv = "Date,Day,Shift,Person\n";
-      for(const [k,v] of Object.entries(assignment)) {
-        if(!v) continue;
-        const d = parseLocalDate(k);
-        csv += `${k},${hebDaysShort[d.getDay()]},Shift,${v}\n`;
-      }
-      const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = "schedule.csv"; a.click();
-    };
-    document.getElementById("themeBtn").onclick = () => {
-      const n = document.documentElement.getAttribute("data-theme")==='dark'?'light':'dark';
-      document.documentElement.setAttribute("data-theme", n);
-    };
-
-    // Admin
-    document.getElementById("adminBtn").onclick = () => document.getElementById("adminBackdrop").style.display="flex";
-    document.getElementById("adminCloseBtn").onclick = () => document.getElementById("adminBackdrop").style.display="none";
-    document.getElementById("adminSaveBtn").onclick = async () => {
-      await setDoc(doc(db,"groups",currentGroupId), {
-        startDate: document.getElementById("adminStartDate").value,
-        horizonWeeks: Number(document.getElementById("adminHorizon").value),
-        lockedUntil: document.getElementById("adminLockUntil").value
-      }, {merge:true});
-      document.getElementById("adminBackdrop").style.display="none";
-      switchGroup(currentGroupId);
-    };
-
-    // 9. INIT
-    onAuthStateChanged(auth, (user) => {
-      if(user) initApp();
-      else signInAnonymously(auth).catch(e => {
-        console.error("Auth Error", e);
-        initApp(); // Run offline anyway
-      });
+    // 3. Listen to Constraints
+    const start = parseKey(data.startDate);
+    const mKey = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}`;
+    
+    unsub = onSnapshot(collection(db, "groups", groupName, "constraints", mKey, "days"), (snap) => {
+      constraints = {};
+      snap.forEach(d => constraints[d.id] = d.data());
+      renderConstraintsGrid();
+      computeSchedule();
     });
+  };
 
-  </script>
+  // --- RENDER CONSTRAINTS (Right Side) ---
+  function renderConstraintsGrid() {
+    const grid = qs("#daysGrid");
+    const start = parseKey(groupData.startDate);
+    const end = addDays(start, (groupData.horizonWeeks * 7) - 1);
+    
+    let html = "";
+    const days = ["א","ב","ג","ד","ה","ו","ש"];
+    html += days.map(d=>`<div style="text-align:center;font-weight:700;font-size:12px;color:var(--muted)">${d}</div>`).join("");
+
+    let curr = new Date(start);
+    while(curr <= end) {
+      const k = toKey(curr);
+      const day = curr.getDay();
+      const isShabbat = day === 6;
+      
+      // My status
+      let status = 0;
+      if(activeUser && constraints[k]) status = constraints[k][activeUser.name] || 0;
+      
+      html += `
+        <div class="day-cell s-${status} ${isShabbat?'shabbat':''}" onclick="toggleDay('${k}', ${isShabbat})">
+          <div class="d-num">${curr.getDate()}</div>
+          <div class="d-name">${curr.getMonth()+1}</div>
+        </div>
+      `;
+      curr = addDays(curr, 1);
+    }
+    grid.innerHTML = html;
+  }
+
+  window.toggleDay = (k, isShabbat) => {
+    if(isShabbat) return;
+    if(!activeUser) return toast("התחבר קודם", false);
+    
+    // Check if I belong to this group or am admin
+    if(activeUser.group !== currentGroup && activeUser.role !== 'admin') {
+      return toast(`אתה שייך לצוות ${activeUser.group}, אין לך גישה לערוך את ${currentGroup}`, false);
+    }
+
+    // Check lock
+    if(groupData.lockedUntil && new Date() < parseKey(groupData.lockedUntil) && activeUser.role !== 'admin') {
+      return toast("הלוח נעול לעריכה", false);
+    }
+
+    if(!constraints[k]) constraints[k] = {};
+    const old = constraints[k][activeUser.name] || 0;
+    constraints[k][activeUser.name] = (old + 1) % 3;
+    
+    // Optimistic Render
+    renderConstraintsGrid();
+  };
+
+  qs("#saveBtn").onclick = async () => {
+    if(!activeUser) return;
+    const start = parseKey(groupData.startDate);
+    const mKey = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}`;
+    const batch = writeBatch(db);
+    
+    let changes = 0;
+    for(const [k, v] of Object.entries(constraints)) {
+      if(v[activeUser.name] !== undefined) {
+        const ref = doc(db, "groups", currentGroup, "constraints", mKey, "days", k);
+        batch.set(ref, {[activeUser.name]: v[activeUser.name]}, {merge:true});
+        changes++;
+      }
+    }
+    if(changes) { await batch.commit(); toast("נשמר בהצלחה!"); }
+    else toast("לא זוהו שינויים", false);
+  };
+
+  qs("#resetBtn").onclick = () => {
+    if(confirm("לנקות את הבחירות שלך מהמסך?")) {
+      renderConstraintsGrid(); // Just re-renders from memory/DB state (effectively clearing unsaved local)
+      toast("המסך רוענן");
+    }
+  };
+
+  // --- RENDER SCHEDULE (Left Side) ---
+  function computeSchedule() {
+    const people = groupData.people;
+    const start = parseKey(groupData.startDate);
+    const weeks = Number(groupData.horizonWeeks);
+    const end = addDays(start, weeks*7 - 1);
+    
+    // Lock badge
+    const isLocked = groupData.lockedUntil && new Date() < parseKey(groupData.lockedUntil);
+    qs("#lockBadge").style.display = isLocked ? "inline-block" : "none";
+
+    // Counters
+    const counts = { total:{}, fri:{} };
+    people.forEach(p => { counts.total[p]=0; counts.fri[p]=0; });
+
+    let html = "";
+    let curr = new Date(start);
+    
+    while(curr <= end) {
+      const day = curr.getDay();
+      if(day === 6) { curr = addDays(curr,1); continue; } // Skip Shabbat
+
+      const k = toKey(curr);
+      const isFri = day === 5;
+      
+      // Algorithm Logic
+      let candidates = people.filter(p => {
+        const pref = constraints[k]?.[p] || 0;
+        return pref !== 2; // Not blocked
+      });
+      
+      // Prioritize Avail(0) over PreferNo(1)
+      const avail = candidates.filter(p => (constraints[k]?.[p]||0) === 0);
+      if(avail.length) candidates = avail;
+
+      // Sort by Fairness
+      candidates.sort((a,b) => {
+        if(isFri) return counts.fri[a] - counts.fri[b];
+        return counts.total[a] - counts.total[b];
+      });
+
+      const winner = candidates.length ? candidates[0] : null;
+      if(winner) {
+        counts.total[winner]++;
+        if(isFri) counts.fri[winner]++;
+      }
+
+      // Render Card
+      const dateStr = `${fmtDate(curr)}`;
+      const dayName = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"][day];
+      const time = isFri ? "08:00-14:00" : "16:00-22:00";
+      
+      // Warnings
+      const prefs = constraints[k] || {};
+      const warns = people.filter(p => prefs[p] === 1).length;
+      const bads = people.filter(p => prefs[p] === 2).length;
+
+      html += `
+        <div class="shift-card ${isFri?'fri':''}">
+          <div class="sc-header">
+             <span>${dateStr}</span>
+             <span>${time}</span>
+          </div>
+          <div class="sc-day">${dayName}</div>
+          
+          <div class="assigned-pill ${winner?'filled':''}">
+            ${winner || 'אין משובץ'}
+          </div>
+
+          <div class="mini-status">
+            ${warns ? `<span class="stat" style="color:var(--warn-txt)">${warns}⚠️</span>` : ''}
+            ${bads ? `<span class="stat" style="color:var(--bad-txt)">${bads}⛔</span>` : ''}
+          </div>
+        </div>
+      `;
+
+      curr = addDays(curr, 1);
+    }
+    qs("#scheduleGrid").innerHTML = html;
+
+    // Summary Table
+    let tbl = `<table style="width:100%;font-size:14px;text-align:center;margin-top:10px">
+      <tr style="color:var(--muted)"><th>שם</th><th>סה״כ</th><th>שישי</th></tr>`;
+    people.forEach(p => {
+       tbl += `<tr style="border-top:1px solid var(--border)">
+         <td style="padding:6px;text-align:right">${p}</td>
+         <td>${counts.total[p]}</td>
+         <td>${counts.fri[p]}</td>
+       </tr>`;
+    });
+    qs("#summaryBox").innerHTML = tbl + "</table>";
+  }
+
+  // --- EVENTS ---
+  qs("#computeBtn").onclick = () => { computeSchedule(); toast("השיבוץ חושב מחדש"); };
+  
+  // Admin Logic
+  qs("#adminBtn").onclick = () => qs("#adminModal").style.display = "flex";
+  qs("#admSave").onclick = async () => {
+    await setDoc(doc(db, "groups", currentGroup), {
+      startDate: qs("#admStart").value,
+      horizonWeeks: qs("#admWeeks").value,
+      lockedUntil: qs("#admLock").value
+    }, {merge:true});
+    qs("#adminModal").style.display = "none";
+    switchTab(currentGroup); // Reload
+    toast("הגדרות נשמרו");
+  };
+
+  // Auth Start
+  onAuthStateChanged(auth, user => {
+    if(user) init();
+    else signInAnonymously(auth).then(()=>init());
+  });
+
+</script>
 </body>
 </html>
