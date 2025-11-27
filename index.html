@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>לוח שיבוצים - גרסה יציבה</title>
+  <title>מערכת שיבוצים - מלאה ויציבה</title>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#0f172a; --card:#1e293b; --ink:#f8fafc; --muted:#94a3b8;
       --border:#334155; --accent:#38bdf8; --accent2:#06b6d4;
-      --chip-bg:#1e293b; --pill-bg:#334155; --btn-ink:#0f172a;
+      --chip-bg:#0f172a; --pill-bg:#334155; --btn-ink:#0f172a;
       --ok-bg:#052e16; --ok-br:#22c55e; --ok-ink:#bbf7d0;
       --warn-bg:#422006; --warn-br:#ca8a04; --warn-ink:#fde047;
       --bad-bg:#450a0a; --bad-br:#ef4444; --bad-ink:#fecaca;
@@ -29,14 +29,16 @@
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant",system-ui;padding-bottom:80px;overflow-y:scroll;}
     
-    /* Layout */
     .app{max-width:1600px;margin:0 auto;padding:16px;}
+    
+    /* Header */
     header.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
     .title{margin:0;font-size:26px;font-weight:800}
     .sub{color:var(--muted);font-size:14px;margin-top:4px;display:block}
     .header-actions{display:flex;gap:8px;align-items:center}
     .id-badge{border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:13px;background:var(--card)}
     
+    /* Buttons */
     button{cursor:pointer;border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-family:inherit;font-size:14px;transition:0.2s;}
     button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--btn-ink)}
     button.primary:hover{opacity:0.9;transform:translateY(-1px)}
@@ -44,13 +46,14 @@
     button.ghost:hover{background:var(--pill-bg)}
     .icon-btn{width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--ink)}
     
+    /* Panels */
     .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
     .panel .hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .panel .bd{padding:16px}
-    .split{display:grid;grid-template-columns:1fr 340px;gap:16px}
-    @media(max-width:1000px){.split{grid-template-columns:1fr}}
+    .split{display:grid;grid-template-columns:1fr 350px;gap:16px}
+    @media(max-width:1100px){.split{grid-template-columns:1fr}}
 
-    /* Schedule */
+    /* Schedule Grid */
     .schedule-header{display:flex;gap:10px;align-items:center}
     .schedule{display:grid;grid-template-columns:90px repeat(6, 1fr);gap:8px;overflow-x:auto}
     @media(max-width:1200px){.schedule{min-width:800px}}
@@ -69,7 +72,7 @@
     .pill.bad{background:var(--bad-bg);border-color:var(--bad-br);color:var(--bad-ink)}
     .pill.warn{background:var(--warn-bg);border-color:var(--warn-br);color:var(--warn-ink)}
 
-    /* Days Grid */
+    /* Days & Chips */
     .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
     .day{background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:8px;min-height:50px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px;font-size:13px;transition:0.1s;user-select:none}
     .day:hover{border-color:var(--accent)}
@@ -125,14 +128,13 @@
       <section class="panel">
         <div class="hd">
           <div class="schedule-header">
-            <h3 style="margin:0" id="scheduleTitle">לוח שיבוצים</h3>
+            <h3 style="margin:0" id="scheduleTitle">טוען...</h3>
             <span id="dateRangeBadge" class="badge" style="border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:12px"></span>
             <span id="lockBadge" class="badge" style="background:var(--bad-bg);color:var(--bad-ink);padding:2px 8px;border-radius:4px;font-size:12px;display:none;">🔒 נעול</span>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button id="computeBtn" class="ghost">⚡ חשב</button>
             <button id="exportBtn" class="ghost">📥 CSV</button>
-            <button id="addCalendarBtn" class="ghost">📅 יומן</button>
           </div>
         </div>
         <div class="bd">
@@ -163,7 +165,7 @@
   <div id="bottomTabs" class="bottom-tabs"></div>
 
   <!-- Login Modal -->
-  <div id="identityBackdrop" class="modal-backdrop" style="display:flex">
+  <div id="identityBackdrop" class="modal-backdrop" style="display:none">
     <div class="modal">
       <h2>התחברות</h2>
       <p style="color:var(--muted);margin-bottom:16px">בחר את השם שלך כדי להתחיל.</p>
@@ -220,7 +222,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // 2. DATA CONSTANTS (Fallbacks)
+    // 2. DATA CONSTANTS (Defaults / Offline)
     const DEFAULT_GROUPS = {
       "מדפסות": { name: "מדפסות", people: ["נבו","נטע","טל"], horizonWeeks: 4 },
       "תפירה": { name: "תפירה", people: ["כליל","עמית","שירה"], horizonWeeks: 4 },
@@ -253,29 +255,7 @@
     const MS_DAY = 86400000;
     const hebDaysShort = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
 
-    // 4. UI ELEMENTS
-    const els = {
-      modal: document.getElementById("identityBackdrop"),
-      select: document.getElementById("identitySelect"),
-      startBtn: document.getElementById("identityStartBtn"),
-      whoami: document.getElementById("whoami"),
-      switchBtn: document.getElementById("switchUserBtn"),
-      scheduleGrid: document.getElementById("scheduleGrid"),
-      daysGrid: document.getElementById("daysGrid"),
-      tabs: document.getElementById("bottomTabs"),
-      chips: document.getElementById("peopleChips"),
-      adminBtn: document.getElementById("adminBtn"),
-      adminModal: document.getElementById("adminBackdrop"),
-      toastWrap: document.getElementById("toastWrap"),
-      title: document.getElementById("scheduleTitle"),
-      dateBadge: document.getElementById("dateRangeBadge"),
-      lockBadge: document.getElementById("lockBadge"),
-      summary: document.getElementById("summaryBox")
-    };
-
-    // 5. CORE FUNCTIONS
-
-    // Date Helpers
+    // 4. HELPERS
     function parseLocalDate(str) {
       if(!str) return new Date();
       const [y,m,d] = str.split('-').map(Number);
@@ -300,140 +280,146 @@
       t.className = `toast`;
       let icon = type==="ok"?"✅":type==="warn"?"⚠️":"❌";
       t.innerHTML = `<div><span style="margin-inline-end:8px">${icon}</span>${msg}</div>`;
-      els.toastWrap.appendChild(t);
+      document.getElementById("toastWrap").appendChild(t);
       setTimeout(() => { t.style.opacity="0"; setTimeout(()=>t.remove(),300); }, 3000);
     }
 
-    // Startup
+    // 5. APP LOGIC
     async function initApp() {
+      // 1. Get Users (Fail-safe)
       try {
-        // Try to load Users
-        let uSnap;
-        try {
-           uSnap = await getDocs(collection(db, "users"));
-        } catch(e) { console.warn("DB Read Error", e); }
-        
-        if(!uSnap || uSnap.empty) {
-          allUsersCache = DEFAULT_USERS; // Fallback
-          // Attempt seed (will fail if no permission, but that's ok)
-          try {
-            const batch = writeBatch(db);
-            DEFAULT_USERS.forEach(u => batch.set(doc(db,"users",u.id), u));
-            await batch.commit();
-          } catch(e){}
-        } else {
+        const snap = await getDocs(collection(db, "users"));
+        if(!snap.empty) {
           allUsersCache = [];
-          uSnap.forEach(d => allUsersCache.push({id:d.id, ...d.data()}));
+          snap.forEach(d => allUsersCache.push({id:d.id, ...d.data()}));
+        } else {
+          throw new Error("Empty DB");
         }
-
-        // Render Select
-        els.select.innerHTML = allUsersCache.map(u => 
-          `<option value="${u.id}">${u.name} (${u.group})</option>`
-        ).join("");
-
-        // Check Local Storage
-        const savedUid = localStorage.getItem("sched_uid");
-        if(savedUid) {
-          const found = allUsersCache.find(u => u.id === savedUid);
-          if(found) {
-             doLogin(found);
-             return;
-          }
-        }
-        // Show Modal if no login
-        els.modal.style.display = "flex";
-
-      } catch(err) {
-        console.error("Critical Init Error", err);
-        alert("שגיאה בטעינת המערכת. נסה לרענן.");
+      } catch(e) {
+        console.warn("Loading offline users", e);
+        allUsersCache = DEFAULT_USERS;
+        // Seed if possible
+        try {
+           const batch = writeBatch(db);
+           DEFAULT_USERS.forEach(u => batch.set(doc(db,"users",u.id), u));
+           await batch.commit();
+        } catch(e2){}
       }
+
+      // Populate Select
+      const sel = document.getElementById("identitySelect");
+      sel.innerHTML = allUsersCache.map(u => `<option value="${u.id}">${u.name} (${u.group})</option>`).join("");
+
+      // Auto Login
+      const savedUid = localStorage.getItem("sched_uid");
+      if(savedUid) {
+        const found = allUsersCache.find(u => u.id === savedUid);
+        if(found) {
+           doLogin(found);
+           return;
+        }
+      }
+      document.getElementById("identityBackdrop").style.display = "flex";
     }
 
-    // Login Logic
     async function doLogin(user) {
-      try {
-        els.startBtn.textContent = "טוען...";
-        activeUser = user;
-        localStorage.setItem("sched_uid", user.id);
-        
-        els.whoami.textContent = `${user.name}`;
-        els.adminBtn.style.display = user.role === 'admin' ? 'inline-flex' : 'none';
-        
-        await switchGroup(user.group);
-        els.modal.style.display = "none";
-        toast("התחברת בהצלחה");
-      } catch(e) {
-        console.error(e);
-        toast("שגיאה בכניסה לקבוצה", "bad");
-        els.modal.style.display = "flex"; // Re-open on error
-      } finally {
-        els.startBtn.textContent = "התחל";
-      }
+      activeUser = user;
+      localStorage.setItem("sched_uid", user.id);
+      
+      document.getElementById("whoami").textContent = `${user.name}`;
+      document.getElementById("adminBtn").style.display = user.role === 'admin' ? 'inline-flex' : 'none';
+      
+      await switchGroup(user.group);
+      document.getElementById("identityBackdrop").style.display = "none";
+      toast("התחברת בהצלחה");
     }
 
     async function switchGroup(groupId) {
       currentGroupId = groupId;
       
-      // Get Group Data
-      let gData = DEFAULT_GROUPS[groupId] || { name: groupId, people: [], horizonWeeks: 4 };
+      // Default Data + Ensure valid start date
+      let finalData = DEFAULT_GROUPS[groupId] || { name: groupId, people: [], horizonWeeks: 4 };
+      // Always fallback to today if DB date is missing
+      finalData.startDate = fmtDateKey(new Date()); 
+
+      // Try DB Fetch
       try {
         const snap = await getDoc(doc(db, "groups", groupId));
-        if(snap.exists()) gData = snap.data();
-      } catch(e) { console.warn("Group fetch error, using default"); }
+        if(snap.exists()) {
+          const dbData = snap.data();
+          if(dbData.startDate) finalData.startDate = dbData.startDate;
+          if(dbData.horizonWeeks) finalData.horizonWeeks = dbData.horizonWeeks;
+          if(dbData.lockedUntil) finalData.lockedUntil = dbData.lockedUntil;
+          if(dbData.people) finalData.people = dbData.people;
+          if(dbData.name) finalData.name = dbData.name;
+        } else {
+          // Create missing doc silently
+          setDoc(doc(db, "groups", groupId), finalData, {merge:true}).catch(e=>{});
+        }
+      } catch(e) {
+        console.error("Group load failed, using default", e);
+      }
 
-      currentGroupData = gData;
+      currentGroupData = finalData;
       
-      // People
-      let pList = gData.people || [];
+      // Determine People
+      let pList = finalData.people || [];
       if(!pList.length) pList = allUsersCache.filter(u => u.group === groupId).map(u => u.name);
       peopleInGroup = pList;
 
       // Update UI
-      els.title.textContent = `לוח שיבוצים – ${gData.name || groupId}`;
+      document.getElementById("scheduleTitle").textContent = `לוח שיבוצים – ${finalData.name}`;
       renderTabs();
       renderChips();
-      
-      // Admin inputs
-      document.getElementById("adminStartDate").value = gData.startDate || "";
-      document.getElementById("adminHorizon").value = gData.horizonWeeks || 4;
-      document.getElementById("adminLockUntil").value = gData.lockedUntil || "";
+
+      document.getElementById("adminStartDate").value = finalData.startDate;
+      document.getElementById("adminHorizon").value = finalData.horizonWeeks;
+      document.getElementById("adminLockUntil").value = finalData.lockedUntil || "";
 
       // Load Constraints
       if(unsubConstraints) unsubConstraints();
-      const startDate = parseLocalDate(gData.startDate || fmtDateKey(new Date()));
-      const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}`;
-      
       state = {};
       renderCalendar(); // clear old
+      runCompute(); // run empty compute to clear schedule
 
-      const q = collection(db, "groups", groupId, "constraints", monthKey, "days");
-      unsubConstraints = onSnapshot(q, (ss) => {
-        ss.docChanges().forEach(ch => {
-          if(ch.type==="removed") delete state[ch.doc.id];
-          else state[ch.doc.id] = ch.doc.data();
+      // Live Listener
+      try {
+        const startDate = parseLocalDate(finalData.startDate);
+        const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}`;
+        const q = collection(db, "groups", groupId, "constraints", monthKey, "days");
+        
+        unsubConstraints = onSnapshot(q, (ss) => {
+          ss.docChanges().forEach(ch => {
+            if(ch.type==="removed") delete state[ch.doc.id];
+            else state[ch.doc.id] = ch.doc.data();
+          });
+          renderCalendar();
+          runCompute();
+        }, (err) => {
+          console.warn("Live sync failed", err);
         });
-        renderCalendar();
-        runCompute();
-      }, (err) => console.log("Listen error (safe to ignore if offline)"));
+      } catch(e) { console.warn("Snapshot init failed", e); }
     }
 
-    // Render Logic
+    // 6. RENDERERS
     function renderTabs() {
-      els.tabs.innerHTML = Object.keys(DEFAULT_GROUPS).map(k => 
+      const div = document.getElementById("bottomTabs");
+      div.innerHTML = Object.keys(DEFAULT_GROUPS).map(k => 
         `<div class="tab ${k===currentGroupId?'active':''}" onclick="changeGroup('${k}')">${k}</div>`
       ).join("");
     }
     window.changeGroup = (g) => switchGroup(g);
 
     function renderChips() {
-      els.chips.innerHTML = peopleInGroup.map(p => 
+      const div = document.getElementById("peopleChips");
+      div.innerHTML = peopleInGroup.map(p => 
         `<div class="chip ${activeUser&&activeUser.name===p?'active':''}" onclick="impersonate('${p}')">${p}</div>`
       ).join("");
     }
     window.impersonate = (p) => {
       if(activeUser && activeUser.role === 'admin') {
-        activeUser = {...activeUser, name: p};
-        renderChips(); renderCalendar(); toast(`עורך כעת את: ${p}`);
+        activeUser = {...activeUser, name:p};
+        renderChips(); renderCalendar(); toast(`עורך כ: ${p}`);
       }
     };
 
@@ -443,12 +429,12 @@
       const weeks = Number(currentGroupData.horizonWeeks);
       const endDate = addDays(startDate, weeks*7 - 1);
       
-      els.dateBadge.textContent = `${fmtDM(startDate)} – ${fmtDM(endDate)}`;
-      
-      const isLocked = currentGroupData.lockedUntil && new Date() < parseLocalDate(currentGroupData.lockedUntil);
-      els.lockBadge.style.display = isLocked ? "inline-block" : "none";
+      document.getElementById("dateRangeBadge").textContent = `${fmtDM(startDate)} – ${fmtDM(endDate)}`;
+      const locked = currentGroupData.lockedUntil && new Date() < parseLocalDate(currentGroupData.lockedUntil);
+      document.getElementById("lockBadge").style.display = locked ? "inline-block" : "none";
 
-      els.daysGrid.innerHTML = rangeDays(startDate, endDate).map(d => {
+      const grid = document.getElementById("daysGrid");
+      grid.innerHTML = rangeDays(startDate, endDate).map(d => {
         const k = fmtDateKey(d);
         const day = d.getDay();
         const isShabbat = day===6;
@@ -463,15 +449,15 @@
 
     window.toggleDay = (k, isShabbat) => {
       if(isShabbat || !activeUser) return;
-      const isLocked = currentGroupData.lockedUntil && new Date() < parseLocalDate(currentGroupData.lockedUntil);
-      if(isLocked && activeUser.role !== 'admin') return toast("הלוח נעול","warn");
-
+      const locked = currentGroupData.lockedUntil && new Date() < parseLocalDate(currentGroupData.lockedUntil);
+      if(locked && activeUser.role !== 'admin') return toast("הלוח נעול","warn");
+      
       if(!state[k]) state[k]={};
       state[k][activeUser.name] = ((state[k][activeUser.name]||0)+1)%3;
       renderCalendar();
     };
 
-    // Algorithm
+    // 7. COMPUTE ALGORITHM
     function runCompute() {
       if(!currentGroupData) return;
       const startDate = parseLocalDate(currentGroupData.startDate);
@@ -481,7 +467,9 @@
 
       const counters = { total:{}, week:[], friday:{} };
       peopleInGroup.forEach(p => { counters.total[p]=0; counters.friday[p]=0; });
-      for(let i=0;i<weeks;i++) { counters.week[i]={}; peopleInGroup.forEach(p=>counters.week[i][p]=0); }
+      for(let i=0; i<weeks; i++) { 
+        counters.week[i]={}; peopleInGroup.forEach(p=>counters.week[i][p]=0); 
+      }
 
       const assignment = {};
       const getPref = (k,p) => (state[k] && state[k][p]!==undefined) ? state[k][p] : 0;
@@ -490,8 +478,8 @@
         const day = d.getDay();
         if(day===6) return;
         const k = fmtDateKey(d);
-        const wIdx = Math.floor((d-startDate)/(7*MS_DAY));
-        if(wIdx>=weeks) return;
+        const wIdx = Math.floor((d - startDate)/(7*MS_DAY));
+        if(wIdx >= weeks) return;
 
         let candidates = peopleInGroup.filter(p => getPref(k,p) !== 2);
         const avail = candidates.filter(p => getPref(k,p) === 0);
@@ -499,29 +487,29 @@
 
         if(candidates.length) {
           candidates.sort((a,b) => {
-            if(day===5) { // Fri
+            if(day===5) { // Friday fairness
                if(counters.friday[a] !== counters.friday[b]) return counters.friday[a]-counters.friday[b];
             }
             if(counters.week[wIdx][a] !== counters.week[wIdx][b]) return counters.week[wIdx][a]-counters.week[wIdx][b];
             return counters.total[a]-counters.total[b];
           });
-          const winner = candidates[0];
-          assignment[k] = winner;
-          counters.total[winner]++;
-          counters.week[wIdx][winner]++;
-          if(day===5) counters.friday[winner]++;
+          const win = candidates[0];
+          assignment[k] = win;
+          counters.total[win]++;
+          counters.week[wIdx][win]++;
+          if(day===5) counters.friday[win]++;
         } else {
           assignment[k] = null;
         }
       });
-      lastComputedPack = { assignment, counters, startDate, weeks };
+      lastComputedPack = { assignment, counters, weeks, startDate };
       renderSchedule();
       renderSummary();
     }
 
     function renderSchedule() {
       if(!lastComputedPack) return;
-      const { assignment, startDate, weeks } = lastComputedPack;
+      const { assignment, weeks, startDate } = lastComputedPack;
       let html = `<div class="col-hd"></div>` + [0,1,2,3,4,5].map(i=>`<div class="col-hd">${hebDaysShort[i]}</div>`).join("");
       
       for(let w=0; w<weeks; w++) {
@@ -534,46 +522,44 @@
           const prefs = state[k]||{};
           const warn = peopleInGroup.filter(p=>prefs[p]===1).length;
           const bad = peopleInGroup.filter(p=>prefs[p]===2).length;
-          
+
           html += `<div class="slot ${d===5?'fri':''}">
             <div class="datebox"><span class="d-top">${hebDaysShort[d]}</span><span>${d===5?'08:00':'16:00'}</span></div>
             <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:2px">
               ${win ? `<div class="pill ok"><b>${win}</b></div>` : `<div class="pill bad">ריק</div>`}
               <div style="display:flex;gap:2px">
-                ${warn ? `<span class="pill warn" style="font-size:10px">${warn}⚠️</span>` : ''}
-                ${bad ? `<span class="pill bad" style="font-size:10px">${bad}⛔</span>` : ''}
+                ${warn?`<span class="pill warn" style="font-size:10px">${warn}⚠️</span>`:''}
+                ${bad?`<span class="pill bad" style="font-size:10px">${bad}⛔</span>`:''}
               </div>
             </div>
           </div>`;
         }
       }
-      els.scheduleGrid.innerHTML = html;
+      document.getElementById("scheduleGrid").innerHTML = html;
     }
 
     function renderSummary() {
       if(!lastComputedPack) return;
       const { counters, weeks } = lastComputedPack;
       let html = `<table style="width:100%;font-size:13px;text-align:center"><thead><tr><th>שם</th>`;
-      for(let i=0;i<weeks;i++) html += `<th>שבוע ${i+1}</th>`;
+      for(let i=0; i<weeks; i++) html+=`<th>שב׳ ${i+1}</th>`;
       html += `<th>שישי</th><th>סה״כ</th></tr></thead><tbody>`;
       
       peopleInGroup.forEach(p => {
         html += `<tr><td style="text-align:right">${p}</td>`;
-        for(let i=0;i<weeks;i++) html += `<td>${counters.week[i][p]}</td>`;
+        for(let i=0; i<weeks; i++) html+=`<td>${counters.week[i][p]}</td>`;
         html += `<td>${counters.friday[p]}</td><td style="font-weight:bold">${counters.total[p]}</td></tr>`;
       });
-      html += `</tbody></table>`;
-      els.summary.innerHTML = html;
+      document.getElementById("summaryBox").innerHTML = html + "</tbody></table>";
     }
 
-    // 6. EVENT HANDLERS
-    els.startBtn.onclick = () => {
-      const uid = els.select.value;
+    // 8. EVENTS
+    document.getElementById("identityStartBtn").onclick = () => {
+      const uid = document.getElementById("identitySelect").value;
       const u = allUsersCache.find(x => x.id === uid);
       if(u) doLogin(u);
     };
-    els.switchBtn.onclick = () => { localStorage.removeItem("sched_uid"); location.reload(); };
-    
+    document.getElementById("switchUserBtn").onclick = () => { localStorage.removeItem("sched_uid"); location.reload(); };
     document.getElementById("saveBtn").onclick = async () => {
       if(!activeUser) return;
       const startDate = parseLocalDate(currentGroupData.startDate);
@@ -583,46 +569,56 @@
       for(const [k,v] of Object.entries(state)) {
         if(v[activeUser.name]!==undefined) {
           batch.set(doc(db,"groups",currentGroupId,"constraints",monthKey,"days",k), 
-            {[activeUser.name]:v[activeUser.name]}, {merge:true});
+             {[activeUser.name]:v[activeUser.name]}, {merge:true});
           c++;
         }
       }
-      if(c>0) { await batch.commit(); toast("נשמר בהצלחה"); } else toast("אין שינויים");
+      if(c>0) { await batch.commit(); toast("נשמר בהצלחה"); } 
+      else toast("אין שינויים");
     };
-
     document.getElementById("resetMineBtn").onclick = async () => {
-       if(!activeUser || !confirm("בטוח?")) return;
-       // Simply reload constraints to clear local edit then save logic needs proper delete
-       // For safety in this version we just clear local state and re-render
-       // Real delete would require batch update with deleteField
-       toast("נא לשמור שינויים כדי למחוק לצמיתות מהשרת", "warn");
+       if(!activeUser || !confirm("לנקות את כל האילוצים שלך מהמסך?")) return;
        renderCalendar();
     };
-
-    document.getElementById("computeBtn").onclick = () => { runCompute(); toast("חושב"); };
-
+    document.getElementById("computeBtn").onclick = () => { runCompute(); toast("חושב..."); };
+    document.getElementById("exportBtn").onclick = () => {
+      if(!lastComputedPack) return toast("אין נתונים","warn");
+      const { assignment } = lastComputedPack;
+      let csv = "Date,Day,Shift,Person\n";
+      for(const [k,v] of Object.entries(assignment)) {
+        if(!v) continue;
+        const d = parseLocalDate(k);
+        csv += `${k},${hebDaysShort[d.getDay()]},Shift,${v}\n`;
+      }
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = "schedule.csv"; a.click();
+    };
     document.getElementById("themeBtn").onclick = () => {
-      const cur = document.documentElement.getAttribute("data-theme");
-      document.documentElement.setAttribute("data-theme", cur==="dark"?"light":"dark");
+      const n = document.documentElement.getAttribute("data-theme")==='dark'?'light':'dark';
+      document.documentElement.setAttribute("data-theme", n);
     };
 
     // Admin
-    els.adminBtn.onclick = () => els.adminModal.style.display="flex";
-    document.getElementById("adminCloseBtn").onclick = () => els.adminModal.style.display="none";
+    document.getElementById("adminBtn").onclick = () => document.getElementById("adminBackdrop").style.display="flex";
+    document.getElementById("adminCloseBtn").onclick = () => document.getElementById("adminBackdrop").style.display="none";
     document.getElementById("adminSaveBtn").onclick = async () => {
       await setDoc(doc(db,"groups",currentGroupId), {
         startDate: document.getElementById("adminStartDate").value,
-        horizonWeeks: document.getElementById("adminHorizon").value,
+        horizonWeeks: Number(document.getElementById("adminHorizon").value),
         lockedUntil: document.getElementById("adminLockUntil").value
       }, {merge:true});
-      els.adminModal.style.display="none";
+      document.getElementById("adminBackdrop").style.display="none";
       switchGroup(currentGroupId);
     };
 
-    // 7. INIT
+    // 9. INIT
     onAuthStateChanged(auth, (user) => {
       if(user) initApp();
-      else signInAnonymously(auth).catch(e => console.error("Auth Failed", e));
+      else signInAnonymously(auth).catch(e => {
+        console.error("Auth Error", e);
+        initApp(); // Run offline anyway
+      });
     });
 
   </script>
