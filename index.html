@@ -4,286 +4,369 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>מערכת שיבוצים - סדנה</title>
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#0f172a; --card:#111827; --ink:#e5e7eb; --muted:#9aa6b2;
-      --border:#273244; --accent:#38bdf8; --accent2:#22d3ee;
-      --chip-bg:#0b1222; --pill-bg:#122; --btn-ink:#06121c;
-      --ok-bg:#032015; --ok-br:#0c3; --ok-ink:#b7f7cf;
-      --warn-bg:#231e07; --warn-br:#54450a; --warn-ink:#fde68a;
-      --bad-bg:#2b0a0a; --bad-br:#521; --bad-ink:#fecaca;
-      --fri-bg:#0a1d2b; --fri-br:#224055; --fri-pill:#0e2a3f;
-      --badge-bg:transparent;
-      --title-g1: var(--accent); --title-g2: var(--accent2);
-      --toast-bg: rgba(15,23,42,.9); --toast-br:#2b3a55; --toast-ink:#e5e7eb;
-      --toast-ok:#16a34a; --toast-warn:#eab308; --toast-bad:#ef4444;
+    :root {
+      --bg: #0f172a;
+      --glass: rgba(30, 41, 59, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.4);
+      --secondary: #818cf8;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      
+      --fri-bg: rgba(59, 130, 246, 0.15);
+      --fri-border: rgba(59, 130, 246, 0.3);
+
+      --radius: 16px;
+      --anim: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    html[data-theme="light"]{
-      --bg:#f6f8fb; --card:#ffffff; --ink:#0b1222; --muted:#5b6472;
-      --border:#dce3ea; --accent:#0ea5e9; --accent2:#06b6d4;
-      --chip-bg:#f4f7fb; --pill-bg:#f6fafc; --btn-ink:#001018;
-      --ok-bg:#e8f8ed; --ok-br:#16a34a; --ok-ink:#065f2a;
-      --warn-bg:#fff6db; --warn-br:#eab308; --warn-ink:#6b4f00;
-      --bad-bg:#ffe7e7; --bad-br:#ef4444; --bad-ink:#7f1d1d;
-      --fri-bg:#ecf6ff; --fri-br:#cfe9ff; --fri-pill:#f5faff;
-      --badge-bg:#eef3f8;
-      --title-g1:#0ea5e9; --title-g2:#06b6d4;
-      --toast-bg:#ffffff; --toast-br:#dce3ea; --toast-ink:#0b1222;
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Heebo', sans-serif;
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.15) 0px, transparent 50%);
+      color: var(--text-main);
+      overflow-x: hidden;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; overflow-x:hidden;
-      font-family:"Assistant",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans",sans-serif;
-      background:
-        radial-gradient(1200px 800px at 80% -10%, #0b1222 0%, var(--bg) 40%),
-        linear-gradient(180deg, #0b1222 0%, var(--bg) 100%);
-      color:var(--ink); font-size:16px;
+
+    /* Layout */
+    .app { max-width: 1800px; margin: 0 auto; padding: 24px; }
+    
+    header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 32px; gap: 20px; flex-wrap: wrap;
+    }
+
+    .title-area h1 {
+      font-size: clamp(24px, 4vw, 36px); font-weight: 900; margin: 0;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
     }
     
-    .app{max-width:1600px;margin:0 auto;padding:16px}
-    header.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap; margin-bottom: 20px;}
-    .title{margin:0;font-weight:800;letter-spacing:.2px;font-size:clamp(22px,2.8vw,34px);
-      background:linear-gradient(90deg,var(--title-g1),var(--title-g2));
-      -webkit-background-clip:text;background-clip:text;color:transparent}
-    .sub{color:var(--muted);font-size:14px;margin-top:6px;display:block}
-    .header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:100%}
-    .badge{border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted);background:var(--badge-bg)}
-    .id-badge{border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:13px; cursor: pointer; transition: 0.2s;}
-    .id-badge:hover{background: var(--chip-bg);}
-
-    /* Group Tabs */
+    /* Tabs */
     .group-tabs {
-        display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;
+      display: flex; gap: 10px; margin-top: 16px; background: rgba(0,0,0,0.2);
+      padding: 6px; border-radius: 14px; width: fit-content;
     }
     .tab-btn {
-        background: var(--chip-bg); border: 1px solid var(--border); color: var(--muted);
-        padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;
+      background: transparent; border: none; color: var(--text-muted);
+      padding: 10px 20px; border-radius: 10px; font-weight: 500; cursor: pointer;
+      transition: var(--anim); position: relative; overflow: hidden;
     }
-    .tab-btn:hover { background: var(--border); color: var(--ink); }
+    .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
     .tab-btn.active {
-        background: var(--accent); color: var(--btn-ink); border-color: var(--accent);
-        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+      background: var(--primary); color: #0f172a; font-weight: 700;
+      box-shadow: 0 4px 15px var(--primary-glow);
     }
 
-    .two{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(0,2fr);
-      grid-template-areas:"constraints schedule";
-      gap:18px; align-items:start;
+    /* User Badge */
+    .id-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      padding: 8px 16px; border-radius: 50px; cursor: pointer;
+      transition: var(--anim);
     }
-    .constraints{grid-area:constraints}
-    .schedule-panel{grid-area:schedule}
-
-    @media (max-width: 1100px){
-      .two{grid-template-columns:1fr;grid-template-areas:"schedule" "constraints";}
-      .constraints{position:static}
-      .constraints .bd{max-height:none;overflow:visible}
+    .id-badge:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .avatar {
+      width: 28px; height: 28px; background: var(--primary); border-radius: 50%;
+      color: #000; display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 14px;
     }
 
-    .panel{background:linear-gradient(180deg,var(--card),color-mix(in oklab,var(--card) 80%,var(--bg)));
-      border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.08);overflow:hidden}
-    html[data-theme="dark"] .panel{box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    .panel .hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
-    .panel .bd{padding:16px}
-    .panel h3{margin:0;font-size:20px}
+    /* Main Grid */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) { .layout-grid { grid-template-columns: 1fr; } }
 
-    button{cursor:pointer;border:none;border-radius:12px;padding:10px 14px;font-weight:700;color:var(--btn-ink);background:linear-gradient(90deg,var(--accent),var(--accent2))}
-    button.ghost{background:transparent;color:var(--ink);border:1px solid var(--border)}
-    button.secondary{background:var(--chip-bg);color:var(--ink);border:1px solid var(--border);height:48px}
-    button[disabled]{opacity:.5;cursor:not-allowed}
+    /* Panels */
+    .panel {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column;
+    }
     
-    .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:var(--chip-bg);border:1px solid var(--border);color:var(--ink)}
-    .icon-btn svg{width:26px;height:26px}
+    .panel-hd {
+      padding: 20px; border-bottom: 1px solid var(--glass-border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .panel-hd h3 { margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .panel-bd { padding: 20px; }
 
-    .legend{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
-    .dot{display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid var(--border)}
-    .dot-0{background:var(--chip-bg)}
-    .dot-1{background:#231e07;border-color:#54450a}
-    .dot-2{background:#2b0a0a;border-color:#512}
-    html[data-theme="light"] .dot-1{background:#fff6db;border-color:var(--warn-br)}
-    html[data-theme="light"] .dot-2{background:#ffe7e7;border-color:var(--bad-br)}
+    /* Buttons */
+    .btn {
+      background: var(--primary); color: #0f172a; border: none;
+      padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;
+      transition: var(--anim); display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--primary-glow); }
+    .btn:active { transform: translateY(0); }
+    .btn.ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--glass-border); }
+    .btn.ghost:hover { border-color: var(--text-main); color: var(--text-main); box-shadow: none; }
+    .btn.danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
 
-    .people{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-    .chip{background:var(--chip-bg);color:var(--ink);border:1px solid var(--border);border-radius:999px;padding:8px 12px; opacity: 0.6; pointer-events: none;}
-    .chip.active{outline:2px solid var(--accent); opacity: 1;}
-
-    .days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-    .day{background:var(--chip-bg);border:1px dashed var(--border);border-radius:12px;padding:10px;text-align:center;cursor:pointer;min-height:64px;display:flex;flex-direction:column;gap:6px;justify-content:center}
-    .day .d1{font-size:15px;}
-    .day .d2{font-size:12px;color:var(--muted)}
-    .day.shabbat{opacity:.35;cursor:not-allowed; background: var(--bg); border:none;}
-    .day.fri.state-0{background:var(--fri-bg);border-color:var(--fri-br)}
-    .day.state-1{background:var(--warn-bg);border:1px solid var(--warn-br)}
-    .day.state-2{background:var(--bad-bg);border:1px solid var(--bad-br)}
-    .hint{color:var(--muted);font-size:12px;margin-top:8px}
-
-    .schedule{display:grid;grid-template-columns:minmax(90px,9ch) repeat(6,minmax(0,1fr));gap:10px;align-items:stretch}
-    @media (max-width:1500px){.schedule{grid-template-columns:minmax(90px,9ch) repeat(3,minmax(0,1fr))}}
-    @media (max-width:700px){.schedule{grid-template-columns:1fr}.schedule .col-hd{display:none}}
-    .col-hd{font-size:13px;color:var(--muted);text-align:center;white-space:nowrap}
-
-    .slot{background:var(--chip-bg);border:1px solid var(--border);border-radius:12px;min-height:88px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
-    .slot.fri{background:var(--fri-bg);border-color:var(--fri-br)}
-    .slot .datebox{border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:color-mix(in oklab,var(--chip-bg) 90%, transparent)}
-    .slot .datebox .d-top{font-size:16px;font-weight:700}
-    .slot .datebox .d-time{font-size:12px;color:var(--muted);margin-top:2px}
-    .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:var(--pill-bg);white-space:nowrap}
-    .pill.ok{background:var(--ok-bg);border-color:var(--ok-br);color:var(--ok-ink)}
-    .pill.bad{background:var(--bad-bg);border-color:var(--bad-br);color:var(--bad-ink)}
-    .pill.warn{background:var(--warn-bg);border-color:var(--warn-br);color:var(--warn-ink)}
-
-    .constraints{align-self:start; position:sticky; top:20px}
-    .constraints .bd{max-height:calc(100vh - 132px); overflow:auto}
-
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:9999}
-    html[data-theme="light"] .modal-backdrop{background:rgba(0,0,0,.25)}
-    .modal{width:min(560px,92vw);background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.35);padding:18px}
-    .modal h2{margin:0 0 6px 0}.modal p{margin:0 0 12px 0;color:var(--muted)}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
-    .select,.date{background:var(--chip-bg);color:var(--ink);border:1px solid var(--border);padding:10px 12px;border-radius:10px;min-width:auto;font-weight:600;width:100%}
-    .checkbox{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;background:var(--chip-bg);border:1px solid var(--border);border-radius:10px}
-    .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-
-    .admin-bar{position:fixed;left:12px;top:12px;z-index:10000;display:flex;gap:8px;flex-wrap:wrap}
-
-    .toast-wrap{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:10050;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-    .toast{pointer-events:auto;min-width:260px;max-width:min(92vw,520px);border-radius:14px;border:1px solid var(--toast-br);background:var(--toast-bg);color:var(--toast-ink);padding:12px 14px;box-shadow:0 18px 40px rgba(0,0,0,.35);display:flex;align-items:flex-start;gap:10px}
-    .toast .icon{margin-top:2px}
-    .toast.ok{border-color:color-mix(in oklab,var(--toast-br) 60%,var(--toast-ok))}
-    .toast.warn{border-color:color-mix(in oklab,var(--toast-br) 60%,var(--toast-warn))}
-    .toast.bad{border-color:color-mix(in oklab,var(--toast-br) 60%,var(--toast-bad))}
-    .toast .t-title{font-weight:700;margin-bottom:2px}
-    .toast .t-actions{margin-inline-start:auto;display:flex;gap:6px}
-    .toast .btn{background:transparent;border:1px solid var(--border);color:var(--ink);border-radius:999px;padding:6px 10px;cursor:pointer}
+    /* Constraints Grid (Right Side) */
+    .calendar-wrap { display: flex; flex-direction: column; gap: 12px; }
+    .days-header, .days-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center;
+    }
+    .day-name { font-size: 12px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
     
+    .day-cell {
+      aspect-ratio: 1; background: rgba(255,255,255,0.03);
+      border: 1px solid transparent; border-radius: 10px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; transition: var(--anim); user-select: none;
+      position: relative;
+    }
+    .day-cell:hover { background: rgba(255,255,255,0.08); transform: scale(1.05); }
+    
+    .day-cell.shabbat { opacity: 0.2; pointer-events: none; background: transparent; border: 1px dashed var(--glass-border); }
+    
+    /* States */
+    .day-cell.state-0 { border-color: rgba(255,255,255,0.1); }
+    .day-cell.state-1 { background: rgba(245, 158, 11, 0.2); border-color: var(--warning); color: var(--warning); }
+    .day-cell.state-2 { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
+    
+    .day-num { font-size: 16px; font-weight: 700; }
+    .day-month { font-size: 10px; opacity: 0.6; }
+
+    /* Schedule Grid (Left Side) */
+    .schedule-grid {
+      display: grid; grid-template-columns: 60px repeat(6, 1fr); gap: 12px;
+    }
+    @media (max-width: 900px) { .schedule-grid { grid-template-columns: 1fr; } .col-hd { display: none; } }
+    
+    .col-hd { text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 8px; }
+    
+    .shift-card {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 12px; min-height: 100px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      transition: var(--anim);
+    }
+    .shift-card.fri { background: var(--fri-bg); border-color: var(--fri-border); }
+    .shift-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+    
+    .shift-date { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .shift-time { font-size: 11px; color: var(--text-muted); }
+    
+    .assignee {
+      margin-top: 10px; padding: 6px 10px; border-radius: 8px;
+      text-align: center; font-weight: 600; font-size: 14px;
+      background: rgba(0,0,0,0.3);
+    }
+    .assignee.filled { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .assignee.empty { opacity: 0.5; border: 1px dashed var(--glass-border); }
+    
+    .chips-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .person-chip {
+      background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 20px;
+      font-size: 13px; color: var(--text-muted); border: 1px solid transparent;
+      transition: var(--anim);
+    }
+    .person-chip.active { background: var(--primary); color: #0f172a; font-weight: 700; transform: scale(1.05); }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-box {
+      background: #1e293b; border: 1px solid var(--glass-border);
+      padding: 30px; border-radius: 20px; width: 100%; max-width: 450px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.3s ease;
+    }
+    
+    input, select {
+      width: 100%; background: #0f172a; border: 1px solid var(--glass-border);
+      color: #fff; padding: 12px; border-radius: 10px; margin: 8px 0 20px 0;
+      font-family: inherit; font-size: 16px; transition: var(--anim);
+    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); }
+    label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
+    /* Toast */
+    .toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 10px; }
+    .toast {
+      background: #1e293b; color: #fff; padding: 12px 20px; border-radius: 50px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+      display: flex; align-items: center; gap: 10px; animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
     .loading-overlay {
-        position: absolute; inset: 0; background: var(--bg); opacity: 0.9; 
-        display: flex; align-items: center; justify-content: center; z-index: 50; flex-direction: column; gap: 10px;
+      position: absolute; inset: 0; background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(5px); z-index: 50;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 15px; border-radius: var(--radius);
     }
+    .spinner {
+      width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <!-- admin -->
-  <div class="admin-bar">
-    <button id="adminBtn" class="icon-btn hidden" title="מצב ניהול">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>
-        <path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.05.05a2 2 0 1 1-2.83 2.83l-.05-.05A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1 .2 1.8 1.8 0 0 0-.9 1.57V21a2 2 0 1 1-4 0v-.03A1.8 1.8 0 0 0 8.2 19.4 1.8 1.8 0 0 0 7 19.4a1.8 1.8 0 0 0-1.98.36l-.05.05a2 2 0 1 1-2.83-2.83l.05-.05A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-.2-1 1.8 1.8 0 0 0-1.57-.9H2a2 2 0 1 1 0-4h.03A1.8 1.8 0 0 0 4.6 8.2a1.8 1.8 0 0 0 .2-1A1.8 1.8 0 0 0 4.44 5.2l-.05-.05A2 2 0 1 1 7.22 2.3l.05.05A1.8 1.8 0 0 0 9 4.6c.31.05.66.05 1 0A1.8 1.8 0 0 0 10.9 3V3a2 2 0 1 1 4 0v.03a1.8 1.8 0 0 0 .9 1.57c.34.17.69.24 1 .2a1.8 1.8 0 0 0 1.98-.36l.05-.05a2 2 0 1 1 2.83 2.83l-.05.05A1.8 1.8 0 0 0 19.4 9c.05.34 0 .69-.2 1 .17.34.24.69.2 1 .05.31.05.66 0 1Z"/>
-      </svg>
-    </button>
-  </div>
 
+  <!-- App Container -->
   <div class="app">
-    <header class="header">
-      <div>
-        <h1 class="title">מערכת שיבוצים - סדנה</h1>
+    
+    <!-- Header -->
+    <header>
+      <div class="title-area">
+        <h1>מערכת שיבוצים - סדנה</h1>
         <div class="group-tabs" id="groupTabs">
-           <!-- Tabs will be injected here -->
+          <!-- Dynamic Tabs -->
         </div>
       </div>
-      <div class="header-actions">
-        <div id="whoami" class="id-badge" title="לחץ להחלפה">לא מחובר</div>
-        <button id="themeBtn" class="icon-btn" title="מצב בהיר/כהה">
-          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></svg>
-        </button>
+      
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <div id="whoami" class="id-badge" title="החלף משתמש">
+          <div class="avatar">?</div>
+          <span>אורח</span>
+        </div>
+        <button id="adminBtn" class="btn ghost hidden" title="הגדרות מנהל">⚙️</button>
       </div>
     </header>
 
-    <main class="two">
-      <!-- schedule -->
-      <section class="panel schedule-panel" style="position:relative">
+    <!-- Main Content -->
+    <div class="layout-grid">
+      
+      <!-- Right: Constraints (Selection) -->
+      <section class="panel">
+        <div class="panel-hd">
+          <h3>
+            <span>📝</span> אילוצים
+          </h3>
+          <div style="font-size:12px; display:flex; gap:10px;">
+             <span style="color:var(--text-muted)">⚪ זמין</span>
+             <span style="color:var(--warning)">🟠 מעדיף שלא</span>
+             <span style="color:var(--danger)">🔴 לא יכול</span>
+          </div>
+        </div>
+        <div class="panel-bd" style="position:relative">
+          <div class="chips-wrap" id="peopleChips"></div>
+          
+          <div class="calendar-wrap">
+            <div class="days-header">
+              <div class="day-name">א׳</div><div class="day-name">ב׳</div>
+              <div class="day-name">ג׳</div><div class="day-name">ד׳</div>
+              <div class="day-name">ה׳</div><div class="day-name">ו׳</div>
+              <div class="day-name" style="color:#ef4444">ש׳</div>
+            </div>
+            <div id="daysGrid" class="days-grid"></div>
+          </div>
+
+          <div style="margin-top: 24px; display:flex; gap:10px; flex-wrap:wrap">
+            <button id="saveBtn" class="btn" style="flex:1">💾 שמור נתונים</button>
+            <button id="resetMineBtn" class="btn ghost">🧹 נקה</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Left: Schedule (Result) -->
+      <section class="panel" style="position:relative; min-height: 500px;">
         <div id="loadingSchedule" class="loading-overlay hidden">
-            <span>טוען נתונים...</span>
-            <span style="font-size:12px;color:var(--muted)">אם זה לוקח זמן, נסה לרענן</span>
+          <div class="spinner"></div>
+          <span>טוען לוח...</span>
         </div>
-        <div class="hd" style="display:flex;align-items:center">
-          <h3 style="margin-inline-end:12px">לוח שיבוצים</h3>
-          <span id="dateRangeBadge" class="badge" style="margin-inline-end:auto"></span>
-          <span id="lockedBadge" class="badge" style="color:var(--bad-ink); border-color:var(--bad-br); display:none">🔒 נעול לעריכה</span>
-
-          <button id="exportBtn" class="ghost">יצוא CSV</button>
-        </div>
-        <div class="bd">
-          <div id="scheduleGrid" class="schedule"></div>
-          <div id="summaryBox" style="margin-top:12px"></div>
-        </div>
-      </section>
-
-      <!-- constraints -->
-      <section class="panel constraints">
-        <div class="hd">
-          <h3>אילוצים לחודש קדימה</h3>
-          <div class="legend">
-            <span class="dot dot-0"></span> זמין
-            <span class="dot dot-1"></span> מעדיף שלא
-            <span class="dot dot-2"></span> לא זמין
+        
+        <div class="panel-hd">
+          <div style="display:flex; align-items:center; gap:15px">
+            <h3><span>📅</span> לוח שיבוצים</h3>
+            <span id="dateRangeBadge" style="font-size:13px; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px;"></span>
+            <span id="lockedBadge" style="display:none; font-size:12px; color:var(--danger); background:rgba(239,68,68,0.1); padding:4px 10px; border-radius:20px; border:1px solid rgba(239,68,68,0.2)">🔒 נעול</span>
           </div>
+          <button id="exportBtn" class="btn ghost" style="font-size:13px">📥 CSV</button>
         </div>
-        <div class="bd">
-          <div id="peopleChips" class="people">
-            <!-- Dynamic Chips -->
-          </div>
-          <div id="daysGrid" class="days"></div>
-          <p class="hint">טפיחה על יום מחליפה מצב. הנתונים נשמרים בענן.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button id="saveBtn">שמור שינויים</button>
-            <button id="resetMineBtn" class="ghost">אפס את האילוצים שלי</button>
+
+        <div class="panel-bd">
+          <div id="scheduleGrid" class="schedule-grid"></div>
+          <div style="margin-top: 30px; padding-top:20px; border-top:1px solid var(--glass-border)">
+            <h4 style="margin:0 0 15px 0; font-size:16px">סיכום משמרות</h4>
+            <div id="summaryBox" style="overflow-x:auto"></div>
           </div>
         </div>
       </section>
-    </main>
-  </div>
 
-  <!-- Toasts -->
-  <div id="toastWrap" class="toast-wrap" aria-live="polite"></div>
-
-  <!-- Identity Modal -->
-  <div id="identityBackdrop" class="modal-backdrop">
-    <div class="modal">
-      <h2>הזדהות</h2>
-      <p>בחר את השם שלך כדי להתחבר למערכת.</p>
-      <div class="row">
-        <label for="identitySelect">שם משתמש</label>
-        <select id="identitySelect" class="select">
-          <option value="">טוען רשימה...</option>
-        </select>
-      </div>
-      <div class="actions"><button id="identityStartBtn" type="button">התחבר</button></div>
     </div>
   </div>
 
-  <!-- Admin Modal -->
-  <div id="adminBackdrop" class="modal-backdrop">
-    <div class="modal">
-      <h2>הגדרות מנהל (<span id="adminGroupName"></span>)</h2>
-      <p>שינוי הגדרות לקבוצה הנוכחית.</p>
-      <div class="row">
-        <label for="dateInput">תאריך התחלה</label>
-        <input id="dateInput" class="date" type="date" />
-      </div>
-      <div class="row">
-        <label for="lockInput">נעול לעריכה עד (תאריך)</label>
-        <input id="lockInput" class="date" type="date" />
-      </div>
-      <div class="row">
-        <button id="adminResetBtn" class="ghost" style="border-color:#f00;color:#fca5a5; width:100%" type="button">איפוס טבלה (לטווח הפעיל)</button>
-      </div>
-      <div class="actions">
-        <button id="adminCancelBtn" class="ghost" type="button">סגור</button>
-        <button id="adminSaveBtn" type="button">שמור</button>
+  <!-- Modals -->
+  <div class="modal-overlay" id="identityBackdrop">
+    <div class="modal-box">
+      <h2 style="margin-top:0">היי, מי את/ה? 👋</h2>
+      <p style="color:var(--text-muted); margin-bottom:20px">בחר את השם שלך כדי להתחיל</p>
+      <select id="identitySelect"><option>טוען...</option></select>
+      <button id="identityStartBtn" class="btn" style="width:100%">התחבר למערכת</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="adminBackdrop">
+    <div class="modal-box">
+      <h2 style="margin-top:0">הגדרות ניהול: <span id="adminGroupName" style="color:var(--primary)"></span></h2>
+      
+      <label>תאריך התחלה לשיבוץ</label>
+      <input type="date" id="dateInput">
+
+      <label>משך זמן לתצוגה</label>
+      <select id="durationSelect">
+        <option value="1">שבוע אחד</option>
+        <option value="2">שבועיים</option>
+        <option value="3">3 שבועות</option>
+        <option value="4">4 שבועות</option>
+      </select>
+
+      <label>נעול לעריכה עד (אופציונלי)</label>
+      <input type="date" id="lockInput">
+      
+      <div style="height:1px; background:var(--glass-border); margin:20px 0;"></div>
+      
+      <button id="adminResetBtn" class="btn danger" style="width:100%; margin-bottom:10px">⚠️ איפוס כל האילוצים לטווח זה</button>
+      
+      <div style="display:flex; gap:10px; margin-top:10px">
+        <button id="adminCancelBtn" class="btn ghost" style="flex:1">ביטול</button>
+        <button id="adminSaveBtn" class="btn" style="flex:1">שמור הגדרות</button>
       </div>
     </div>
   </div>
 
+  <div class="toast-container" id="toastWrap"></div>
+
+  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, query, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-    // --- CONFIG ---
+    // Config
     const firebaseConfig = {
       apiKey: "AIzaSyBiZIHRpbg0bq4VFZ2kDDXj6QeRJZpjOpg",
       authDomain: "sadna-timetable.firebaseapp.com",
@@ -296,11 +379,10 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db   = getFirestore(app);
+    const db = getFirestore(app);
 
-    // --- DATA ---
+    // Data Constants
     const GROUPS = ["מדפסות", "תפירה", "מתכת", "עיבוד שבבים", "עץ"];
-    
     const USERS_DB = [
         {id:"u1", name:"נבו", group:"מדפסות", role:"admin"},
         {id:"u2", name:"נטע", group:"מדפסות", role:"user"},
@@ -312,581 +394,478 @@
         {id:"u8", name:"ליעד", group:"עיבוד שבבים", role:"user"},
         {id:"u9", name:"אורי", group:"עץ", role:"user"}
     ];
-
     const MS_DAY = 86400000;
-    const hebDays=["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
-    const hebDaysLong=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
-    
-    // --- STATE ---
+    const hebDaysLong = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+
+    // App State
     let currentGroup = GROUPS[0];
-    let currentUser = null; 
-    let activePersonName = null; 
-    let groupMembers = []; 
-    // INITIALIZE SAFELY TO AVOID NULL ERRORS
-    let groupSettings = { startDate: startOfDay(new Date()), lockedUntil: null };
-    
-    let state = Object.create(null); 
-    let constraintsUnsub = null;
-    let settingsUnsub = null;
-
-    // --- DOM ---
-    const daysGrid = document.getElementById("daysGrid");
-    const scheduleGrid = document.getElementById("scheduleGrid");
-    const summaryBox = document.getElementById("summaryBox");
-    const dateRangeBadge = document.getElementById("dateRangeBadge");
-    const lockedBadge = document.getElementById("lockedBadge");
-    const peopleChips = document.getElementById("peopleChips");
-    const groupTabs = document.getElementById("groupTabs");
-    const loadingSchedule = document.getElementById("loadingSchedule");
-    
-    const identityBackdrop = document.getElementById("identityBackdrop");
-    const identitySelect = document.getElementById("identitySelect");
-    const identityStartBtn = document.getElementById("identityStartBtn");
-    const whoamiEl = document.getElementById("whoami");
-    
-    const adminBtn = document.getElementById("adminBtn");
-    const adminBackdrop = document.getElementById("adminBackdrop");
-    const adminSaveBtn = document.getElementById("adminSaveBtn");
-    const adminCancelBtn = document.getElementById("adminCancelBtn");
-    const adminResetBtn = document.getElementById("adminResetBtn");
-    const dateInput = document.getElementById("dateInput");
-    const lockInput = document.getElementById("lockInput");
-
-    const saveBtn = document.getElementById("saveBtn");
-    const resetMineBtn = document.getElementById("resetMineBtn");
-    const exportBtn = document.getElementById("exportBtn");
-    const themeBtn = document.getElementById("themeBtn");
+    let currentUser = null;
+    let groupMembers = [];
+    let groupSettings = { startDate: new Date(), lockedUntil: null, weeks: 4 };
+    let state = {};
+    let unsubConstraints = null;
+    let unsubSettings = null;
 
     // --- UTILS ---
-    function startOfDay(d){ const c=new Date(d); c.setHours(0,0,0,0); return c; }
-    function addDays(d,n){ return new Date(startOfDay(d).getTime() + n*MS_DAY); }
-    function prevSunday(d){ let x=startOfDay(d); while(x.getDay()!==0){ x=addDays(x,-1);} return x; }
-    function calcFourWeekEnd(d){ const sunday = prevSunday(d); return addDays(sunday, 27); } 
-    function fmtDateKey(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${dd}`; }
-    function fmtDM(d){ const dd=String(d.getDate()).padStart(2,"0"), mm=String(d.getMonth()+1).padStart(2,"0"); return `${dd}.${mm}`; }
-    function rangeDays(d0,d1){ const out=[]; let t=startOfDay(d0).getTime(), t1=startOfDay(d1).getTime(); for(;t<=t1;t+=MS_DAY) out.push(new Date(t)); return out; }
-    function shiftForWeekday(jsDow){ if(jsDow>=0 && jsDow<=4) return {label:"16:00–22:00"}; if(jsDow===5) return {label:"08:00–14:00"}; return null; }
-    function weekIndexFor(date, startD){ let s = prevSunday(startD); return Math.floor((startOfDay(date) - s) / (7*MS_DAY)); }
-    function monthKeyFrom(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"); return `${y}-${m}`; }
+    const startOfDay = d => { const c=new Date(d); c.setHours(0,0,0,0); return c; };
+    const addDays = (d,n) => new Date(startOfDay(d).getTime() + n*MS_DAY);
+    const prevSunday = d => { let x=startOfDay(d); while(x.getDay()!==0) x=addDays(x,-1); return x; };
+    const fmtKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const fmtShow = d => `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`;
+    const monthKeyFrom = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 
-    function toast(msg, type="ok") {
+    function toast(msg, type="success") {
       const el = document.createElement("div");
-      el.className = `toast ${type}`;
-      el.innerHTML = `<div class="icon">${type==='ok'?'✅':(type==='warn'?'⚠️':'❌')}</div><div class="t-text">${msg}</div>`;
+      el.className = "toast";
+      const icon = type==="success" ? "✅" : (type==="danger"?"🛑":"⚠️");
+      el.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
       document.getElementById("toastWrap").appendChild(el);
-      setTimeout(()=> { el.style.opacity="0"; setTimeout(()=>el.remove(),300); }, 3000);
+      setTimeout(() => { el.style.opacity="0"; setTimeout(()=>el.remove(),300); }, 3000);
     }
 
-    // --- THEME ---
-    const savedTheme = localStorage.getItem("scheduler_theme") || "dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
-    renderThemeIcon();
-    themeBtn.addEventListener("click", ()=>{
-      const cur = document.documentElement.getAttribute("data-theme") || "dark";
-      const next = cur === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("scheduler_theme", next);
-      renderThemeIcon();
-    });
-    function renderThemeIcon(){
-       const mode = document.documentElement.getAttribute("data-theme") || "dark";
-       document.getElementById("themeIcon").innerHTML = mode === "dark"
-        ? `<path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M3 12h2M19 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><circle cx="12" cy="12" r="4"/>`
-        : `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    // --- CORE LOGIC ---
+    
+    // 1. Init
+    function init() {
+      const tabs = document.getElementById("groupTabs");
+      tabs.innerHTML = GROUPS.map(g => `<button class="tab-btn" onclick="switchGroup('${g}')">${g}</button>`).join("");
+      
+      const savedUid = localStorage.getItem("scheduler_uid");
+      if(savedUid) {
+        const u = USERS_DB.find(x => x.id === savedUid);
+        if(u) loginUser(u);
+        else showIdentity();
+      } else {
+        showIdentity();
+      }
+      
+      // Auto login anon if needed
+      if(!auth.currentUser) signInAnonymously(auth);
     }
 
-    // --- INIT & TABS ---
-    function renderTabs() {
-        groupTabs.innerHTML = GROUPS.map(g => 
-            `<button class="tab-btn ${g === currentGroup ? 'active' : ''}" data-group="${g}">${g}</button>`
-        ).join("");
-        
-        groupTabs.querySelectorAll(".tab-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const g = btn.dataset.group;
-                if(g !== currentGroup) switchGroup(g);
-            });
-        });
+    window.switchGroup = (g) => {
+      currentGroup = g;
+      renderTabsState();
+      loadGroup();
+    };
+
+    function renderTabsState() {
+      document.querySelectorAll(".tab-btn").forEach(b => {
+        b.classList.toggle("active", b.innerText === currentGroup);
+      });
     }
 
-    async function switchGroup(newGroup) {
-        currentGroup = newGroup;
-        renderTabs();
-        if(auth.currentUser) await loadGroupData();
-    }
+    // 2. Load Group Data
+    function loadGroup() {
+      document.getElementById("loadingSchedule").classList.remove("hidden");
+      groupMembers = USERS_DB.filter(u => u.group === currentGroup).map(u => u.name);
 
-    // --- DATA LOADING & AUTO-CREATION ---
-    async function loadGroupData() {
-        loadingSchedule.classList.remove("hidden");
+      if(unsubSettings) unsubSettings();
+      
+      // Listen to Settings
+      unsubSettings = onSnapshot(doc(db, "groups", currentGroup), async (snap) => {
+        if(!snap.exists()) {
+          // Auto-create
+          await setDoc(doc(db, "groups", currentGroup), { startDate: fmtKey(new Date()), weeks: 4 });
+          return;
+        }
         
-        groupMembers = USERS_DB.filter(u => u.group === currentGroup).map(u => u.name);
+        const d = snap.data();
+        // Parse settings
+        if(d.startDate) {
+          const parts = d.startDate.split('-').map(Number);
+          groupSettings.startDate = startOfDay(new Date(parts[0], parts[1]-1, parts[2]));
+        } else {
+          groupSettings.startDate = startOfDay(new Date());
+        }
         
-        if(settingsUnsub) settingsUnsub();
+        groupSettings.weeks = d.weeks ? Number(d.weeks) : 4;
         
-        // Listener for Group Settings
-        settingsUnsub = onSnapshot(doc(db, "groups", currentGroup), async (docSnap) => {
-            // FIX: If group doesn't exist, create it immediately
-            if (!docSnap.exists()) {
-                console.log(`Creating missing group: ${currentGroup}`);
-                await setDoc(doc(db, "groups", currentGroup), {
-                    startDate: fmtDateKey(new Date()),
-                    lockedUntil: ""
-                });
-                // The snapshot will trigger again automatically after creation
-                return;
-            }
+        if(d.lockedUntil) {
+           const parts = d.lockedUntil.split('-').map(Number);
+           groupSettings.lockedUntil = startOfDay(new Date(parts[0], parts[1]-1, parts[2]));
+        } else {
+           groupSettings.lockedUntil = null;
+        }
 
-            const data = docSnap.data();
-            
-            // Handle Start Date with Fallback to Today
-            if (data.startDate) {
-                const [y, m, d] = data.startDate.split('-').map(Number);
-                groupSettings.startDate = startOfDay(new Date(y, m - 1, d));
-            } else {
-                groupSettings.startDate = startOfDay(new Date());
-            }
-
-            // Handle Lock Date
-            if (data.lockedUntil) {
-                const [y, m, d] = data.lockedUntil.split('-').map(Number);
-                groupSettings.lockedUntil = startOfDay(new Date(y, m - 1, d));
-            } else {
-                groupSettings.lockedUntil = null;
-            }
-
-            // Once settings are loaded, subscribe to days
-            subscribeConstraints(); 
-        }, (error) => {
-            console.error("Error reading group settings:", error);
-            loadingSchedule.textContent = "שגיאה בטעינת נתונים. ודא הרשאות.";
-        });
+        subscribeConstraints();
+      });
     }
 
     function subscribeConstraints() {
-        if(constraintsUnsub) constraintsUnsub();
-        
-        const start = groupSettings.startDate;
-        // Safety check to ensure start is valid
-        if(!start || isNaN(start.getTime())) {
-             groupSettings.startDate = startOfDay(new Date());
-        }
-
-        const monthKey = monthKeyFrom(groupSettings.startDate);
-        
-        constraintsUnsub = onSnapshot(collection(db, "groups", currentGroup, "constraints", monthKey, "days"), (snap) => {
-            state = Object.create(null);
-            snap.forEach(doc => { state[doc.id] = doc.data(); });
-            
-            try {
-                renderUI();
-                loadingSchedule.classList.add("hidden");
-            } catch (e) {
-                console.error("Render Error:", e);
-                loadingSchedule.classList.add("hidden");
-            }
-        });
+      if(unsubConstraints) unsubConstraints();
+      
+      const start = groupSettings.startDate;
+      const mKey = monthKeyFrom(start); // Load based on start month
+      
+      unsubConstraints = onSnapshot(collection(db, "groups", currentGroup, "constraints", mKey, "days"), (snap) => {
+        state = {};
+        snap.forEach(doc => state[doc.id] = doc.data());
+        renderApp();
+        document.getElementById("loadingSchedule").classList.add("hidden");
+      });
     }
 
-    function renderUI() {
-        renderDateInfo();
-        renderConstraintsPanel();
+    // 3. Render
+    function renderApp() {
+      const start = groupSettings.startDate;
+      // End date logic: Start + (Weeks * 7) - 1
+      const totalDays = groupSettings.weeks * 7;
+      const end = addDays(start, totalDays - 1);
+      
+      // Header Info
+      document.getElementById("dateRangeBadge").textContent = `${fmtShow(start)} – ${fmtShow(end)}`;
+      
+      // Lock Status
+      const isLocked = groupSettings.lockedUntil && new Date() < groupSettings.lockedUntil;
+      const canEdit = currentUser && (currentUser.role === 'admin' || !isLocked);
+      
+      document.getElementById("lockedBadge").style.display = isLocked ? "inline-flex" : "none";
+      document.getElementById("saveBtn").disabled = !canEdit;
+      document.getElementById("saveBtn").style.opacity = !canEdit ? "0.5" : "1";
+
+      // --- RIGHT PANEL: CONSTRAINTS ---
+      // Fix: Always start constraints grid from SUNDAY to align with headers
+      const gridStart = prevSunday(start);
+      // We need to cover enough days to include the 'end' date, filling full weeks
+      // Calculate weeks difference
+      const gridEnd = addDays(gridStart, (Math.ceil((end - gridStart + 1) / MS_DAY / 7) * 7) - 1);
+      
+      let html = "";
+      let curr = new Date(gridStart);
+      
+      // Chips
+      const chipsEl = document.getElementById("peopleChips");
+      chipsEl.innerHTML = groupMembers.map(p => 
+        `<div class="person-chip ${p === currentUser?.name ? 'active' : ''}">${p}</div>`
+      ).join("");
+
+      while (curr <= gridEnd) {
+        const k = fmtKey(curr);
+        const day = curr.getDay(); // 0=Sun, 6=Sat
+        const isShabbat = day === 6;
+        const inRange = curr >= start && curr <= end; // Visual distinction for out of range
         
-        const pack = computeSchedule();
-        renderSchedule(pack);
-        renderSummary(pack);
-        checkAdminAccess();
+        // My status
+        const val = (state[k] && currentUser) ? (state[k][currentUser.name] || 0) : 0;
+        
+        let classes = "day-cell";
+        if (isShabbat) classes += " shabbat";
+        else classes += ` state-${val}`;
+        
+        if (!inRange) classes += " out-of-range"; // Optional: dim days outside selected range
+
+        html += `
+          <div class="${classes}" 
+               style="${!inRange ? 'opacity:0.3' : ''}"
+               onclick="toggleDay('${k}', ${isShabbat}, ${inRange})">
+            <div class="day-num">${curr.getDate()}</div>
+            <div class="day-month">${curr.getMonth()+1}</div>
+          </div>
+        `;
+        curr = addDays(curr, 1);
+      }
+      document.getElementById("daysGrid").innerHTML = html;
+
+      // --- LEFT PANEL: SCHEDULE ---
+      const pack = computeSchedule(start, end);
+      renderScheduleGrid(pack, start, end);
+      renderSummary(pack);
+      
+      // Admin Button
+      if (currentUser?.role === 'admin' && currentUser?.group === currentGroup) {
+        document.getElementById("adminBtn").classList.remove("hidden");
+      } else {
+        document.getElementById("adminBtn").classList.add("hidden");
+      }
     }
 
-    function renderDateInfo() {
-        const start = groupSettings.startDate;
-        const end = calcFourWeekEnd(start);
-        dateRangeBadge.textContent = `${fmtDM(start)} – ${fmtDM(end)}`;
-        
-        const isLocked = groupSettings.lockedUntil && new Date() < groupSettings.lockedUntil;
-        if(isLocked && (!currentUser || currentUser.role !== 'admin')) {
-            lockedBadge.style.display = "inline-flex";
-            saveBtn.setAttribute("disabled", "disabled");
-            saveBtn.title = "הלוח נעול לעריכה";
-        } else {
-            lockedBadge.style.display = "none";
-            saveBtn.removeAttribute("disabled");
-            saveBtn.title = "";
-        }
-    }
+    // 4. Toggle Logic
+    window.toggleDay = (k, isShabbat, inRange) => {
+      if (isShabbat) return;
+      if (!inRange) return toast("תאריך זה מחוץ לטווח השיבוץ", "warning");
+      if (!currentUser) return toast("יש להתחבר כדי לערוך", "danger");
+      
+      const isLocked = groupSettings.lockedUntil && new Date() < groupSettings.lockedUntil;
+      if (isLocked && currentUser.role !== 'admin') return toast("הלוח נעול לעריכה", "danger");
+      
+      if (currentUser.group !== currentGroup && currentUser.role !== 'admin') {
+         return toast("אינך שייך לקבוצה זו", "danger");
+      }
 
-    function checkAdminAccess() {
-        if(currentUser && currentUser.role === 'admin' && currentUser.group === currentGroup) {
-            adminBtn.classList.remove("hidden");
-        } else {
-            adminBtn.classList.add("hidden");
-        }
-    }
-
-    // --- CONSTRAINTS PANEL (FIXED) ---
-    function renderConstraintsPanel() {
-        // Chips
-        let chipsHtml = "";
-        groupMembers.forEach(p => {
-            const isMe = (p === activePersonName);
-            chipsHtml += `<span class="chip ${isMe ? 'active' : ''}">${p}</span>`;
-        });
-        peopleChips.innerHTML = chipsHtml;
-
-        // Grid
-        const start = groupSettings.startDate;
-        const end = calcFourWeekEnd(start);
-        const days = rangeDays(start, end);
-
-        let html = hebDays.map(h=>`<div class="day head" aria-hidden="true" style="cursor:default;border:none;background:transparent;min-height:auto"><div class="d2">${h}</div></div>`).join("");
-        
-        for(const d of days) {
-            const key = fmtDateKey(d);
-            const jsDow = d.getDay();
-            const isShabbat = jsDow === 6;
-            const isFri = jsDow === 5;
-            const myStatus = (state[key] && activePersonName) ? (state[key][activePersonName] || 0) : 0;
-            
-            html += `
-              <div class="day ${isShabbat?'shabbat':''} ${isFri?'fri':''} state-${myStatus}" 
-                   data-key="${key}" onclick="toggleDay('${key}', ${isShabbat})">
-                <div class="d1">${d.getDate()}</div>
-                <div class="d2">${d.getMonth()+1}</div>
-              </div>
-            `;
-        }
-        daysGrid.innerHTML = html;
-    }
-
-    window.toggleDay = (key, isShabbat) => {
-        if(isShabbat) return; // Ignore clicks on Shabbat
-        if(!activePersonName) { toast("עליך להתחבר כדי לערוך", "warn"); return; }
-        
-        const isLocked = groupSettings.lockedUntil && new Date() < groupSettings.lockedUntil;
-        if(isLocked && currentUser.role !== 'admin') { toast("הלוח נעול לעריכה", "bad"); return; }
-
-        if(currentUser.group !== currentGroup && currentUser.role !== 'admin') {
-            toast(`אתה שייך לצוות ${currentUser.group}, לא ניתן לערוך ב${currentGroup}`, "warn");
-            return;
-        }
-
-        const row = state[key] || {};
-        const currentVal = row[activePersonName] || 0;
-        const nextVal = (currentVal + 1) % 3;
-        
-        if(!state[key]) state[key] = {};
-        state[key][activePersonName] = nextVal;
-        
-        const cell = document.querySelector(`.day[data-key="${key}"]`);
-        if(cell) {
-            cell.classList.remove("state-0", "state-1", "state-2");
-            cell.classList.add(`state-${nextVal}`);
-        }
+      // Optimistic UI Update
+      if (!state[k]) state[k] = {};
+      const oldVal = state[k][currentUser.name] || 0;
+      state[k][currentUser.name] = (oldVal + 1) % 3;
+      renderApp(); // Re-render to show change
     };
 
-    // --- SCHEDULE LOGIC ---
-    function computeSchedule() {
-        const start = groupSettings.startDate;
-        const end = calcFourWeekEnd(start);
-        const days = rangeDays(start, end);
+    // 5. Schedule Algorithm
+    function computeSchedule(startDate, endDate) {
+      const days = [];
+      let c = new Date(startDate);
+      while(c <= endDate) { days.push(new Date(c)); c = addDays(c, 1); }
+
+      const assign = {};
+      const counts = {}; groupMembers.forEach(m => counts[m] = { total: 0, fri: 0 });
+      const weeks = {}; 
+
+      days.forEach(d => {
+        const dow = d.getDay();
+        if (dow === 6) return; // Skip Shabbat
         
-        const assign = {};
-        const totalCounts = Object.fromEntries(groupMembers.map(p=>[p,0]));
-        const fridayCounts = Object.fromEntries(groupMembers.map(p=>[p,0]));
-        const weekCounts = {};
+        const k = fmtKey(d);
+        // Determine week index relative to start
+        const wIdx = Math.floor((d - prevSunday(startDate)) / (7 * MS_DAY));
+        if (!weeks[wIdx]) weeks[wIdx] = {};
+        
+        // Candidates
+        let candidates = groupMembers.filter(p => {
+           const pref = state[k]?.[p] || 0;
+           return pref !== 2; // Not red
+        });
 
-        for(const d of days) {
-            const jsDow = d.getDay();
-            const sh = shiftForWeekday(jsDow);
-            if(!sh) continue; 
-            
-            const key = fmtDateKey(d);
-            const wIdx = weekIndexFor(d, start);
-            if(!weekCounts[wIdx]) weekCounts[wIdx] = Object.fromEntries(groupMembers.map(p=>[p,0]));
+        // Preference: Green (0) > Orange (1)
+        const greens = candidates.filter(p => (state[k]?.[p]||0) === 0);
+        if(greens.length) candidates = greens;
 
-            const getPref = (dateKey, person) => (state[dateKey]||{})[person] || 0; 
-            let candidates = groupMembers.filter(p => getPref(key, p) !== 2);
-            
-            const avail0 = candidates.filter(p => getPref(key, p) === 0);
-            if(avail0.length > 0) candidates = avail0;
+        // Sort by fairness
+        candidates.sort((a,b) => {
+           // Friday fairness
+           if(dow === 5) return counts[a].fri - counts[b].fri;
+           // Total fairness
+           return counts[a].total - counts[b].total;
+        });
 
-            candidates.sort((a,b) => {
-                if(jsDow === 5) {
-                    if(fridayCounts[a] !== fridayCounts[b]) return fridayCounts[a] - fridayCounts[b];
-                }
-                const wCa = weekCounts[wIdx][a] || 0;
-                const wCb = weekCounts[wIdx][b] || 0;
-                if(wCa !== wCb) return wCa - wCb;
-                return totalCounts[a] - totalCounts[b];
-            });
-
-            if(candidates.length > 0) {
-                const pick = candidates[0];
-                assign[key] = pick;
-                totalCounts[pick]++;
-                weekCounts[wIdx][pick]++;
-                if(jsDow === 5) fridayCounts[pick]++;
-            } else {
-                assign[key] = null; 
-            }
+        const winner = candidates[0];
+        if (winner) {
+          assign[k] = winner;
+          counts[winner].total++;
+          if (dow === 5) counts[winner].fri++;
+          weeks[wIdx][winner] = (weeks[wIdx][winner]||0) + 1;
         }
-        return { assign, weekCounts, fridayCounts };
+      });
+      
+      return { assign, counts, weeks };
     }
 
-    function renderSchedule(pack) {
-        const { assign } = pack;
-        const start = groupSettings.startDate;
-        const end = calcFourWeekEnd(start);
+    function renderScheduleGrid(pack, start, end) {
+      const { assign } = pack;
+      let html = `<div class="col-hd"></div>
+                  <div class="col-hd">א׳</div><div class="col-hd">ב׳</div><div class="col-hd">ג׳</div>
+                  <div class="col-hd">ד׳</div><div class="col-hd">ה׳</div><div class="col-hd">ו׳</div>`;
+      
+      let weekStart = prevSunday(start);
+      // Render as many weeks as configured + safety buffer logic handled by loop
+      const finalDate = addDays(start, (groupSettings.weeks * 7) - 1);
+
+      while (weekStart <= finalDate) {
+        const weekEnd = addDays(weekStart, 6);
+        html += `<div style="display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted);white-space:nowrap;writing-mode:vertical-rl;transform:rotate(180deg)">
+                   ${fmtShow(weekStart)} - ${fmtShow(weekEnd)}
+                 </div>`;
         
-        let html = `
-          <div></div>
-          <div class="col-hd">א׳</div>
-          <div class="col-hd">ב׳</div>
-          <div class="col-hd">ג׳</div>
-          <div class="col-hd">ד׳</div>
-          <div class="col-hd">ה׳</div>
-          <div class="col-hd">ו׳</div>
-        `;
+        for (let i=0; i<6; i++) { // Sun-Fri
+           const cur = addDays(weekStart, i);
+           const k = fmtKey(cur);
+           const inRange = cur >= start && cur <= end;
+           
+           if (!inRange) {
+             html += `<div class="shift-card" style="opacity:0.2; border:none"></div>`;
+             continue;
+           }
 
-        let weekStart = prevSunday(start);
-        let guard = 0;
-        
-        while(weekStart <= end && guard++ < 10) {
-            const weekEnd = addDays(weekStart, 6);
-            html += `<div class="muted" style="display:flex;align-items:center;white-space:nowrap;font-size:12px">
-                ${fmtDM(weekStart)} – ${fmtDM(weekEnd)}
-            </div>`;
+           const isFri = i === 5;
+           const time = isFri ? "08:00-14:00" : "16:00-22:00";
+           const winner = assign[k];
+           
+           // Warnings
+           let warnings = "";
+           const row = state[k] || {};
+           const reds = groupMembers.filter(m => row[m]===2).length;
+           const oranges = groupMembers.filter(m => row[m]===1).length;
+           
+           if(reds) warnings += `<span style="color:var(--danger);font-size:10px">🔴 ${reds}</span> `;
+           if(oranges) warnings += `<span style="color:var(--warning);font-size:10px">🟠 ${oranges}</span>`;
 
-            for(let i=0; i<6; i++) {
-                const cur = addDays(weekStart, i);
-                const key = fmtDateKey(cur);
-                const inRange = cur >= start && cur <= end;
-                const sh = shiftForWeekday(cur.getDay());
-                
-                if(!inRange || !sh) {
-                     html += `<div class="slot" style="opacity:0.3;border:none"></div>`;
-                } else {
-                    const who = assign[key];
-                    const row = state[key] || {};
-                    const isFri = cur.getDay() === 5;
-                    
-                    const preferNo = groupMembers.filter(p => row[p]===1);
-                    const absent = groupMembers.filter(p => row[p]===2);
-
-                    html += `
-                      <div class="slot ${isFri?'fri':''}">
-                        <div class="datebox">
-                           <div class="d-top">${hebDaysLong[cur.getDay()]} ${cur.getDate()}</div>
-                           <div class="d-time">${sh.label}</div>
-                        </div>
-                        <div class="${who ? 'pill ok' : 'pill bad'}" style="justify-content:center;font-size:14px">
-                            ${who || 'אין שיבוץ'}
-                        </div>
-                        ${preferNo.length ? `<div class="pill warn" style="font-size:10px">מעדיף שלא: ${preferNo.join(', ')}</div>` : ''}
-                        ${absent.length ? `<div class="pill bad" style="font-size:10px">לא: ${absent.join(', ')}</div>` : ''}
-                      </div>
-                    `;
-                }
-            }
-            weekStart = addDays(weekStart, 7);
+           html += `
+             <div class="shift-card ${isFri?'fri':''}">
+               <div>
+                 <div class="shift-date">${hebDaysLong[i]} ${cur.getDate()}</div>
+                 <div class="shift-time">${time}</div>
+               </div>
+               <div class="assignee ${winner?'filled':'empty'}">
+                 ${winner || 'אין שיבוץ'}
+               </div>
+               <div style="margin-top:4px; text-align:center">${warnings}</div>
+             </div>
+           `;
         }
-        scheduleGrid.innerHTML = html;
+        weekStart = addDays(weekStart, 7);
+      }
+      document.getElementById("scheduleGrid").innerHTML = html;
     }
 
     function renderSummary(pack) {
-        const { weekCounts, fridayCounts } = pack;
-        let html = `<table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr>
-           <th style="text-align:right;padding:6px;border-bottom:1px solid var(--border)">שבוע</th>`;
-        
-        groupMembers.forEach(p => html += `<th style="text-align:center;padding:6px;border-bottom:1px solid var(--border)">${p}</th>`);
-        html += `</tr></thead><tbody>`;
+      const { counts, weeks } = pack;
+      let html = `<table style="width:100%; border-collapse:collapse; font-size:14px; text-align:center">
+         <thead><tr style="border-bottom:1px solid var(--glass-border); color:var(--text-muted)">
+         <th style="padding:10px; text-align:right">שם</th>`;
+      
+      // Dynamic week headers
+      Object.keys(weeks).sort().forEach((w, i) => html += `<th style="padding:10px">שבוע ${i+1}</th>`);
+      html += `<th style="padding:10px; color:var(--text-main)">סה״כ</th><th style="padding:10px; color:var(--primary)">שישי</th></tr></thead><tbody>`;
 
-        Object.keys(weekCounts).sort().forEach((wIdx, i) => {
-             html += `<tr><td style="padding:6px;border-bottom:1px solid var(--border)">שבוע ${i+1}</td>`;
-             groupMembers.forEach(p => {
-                 html += `<td style="text-align:center;padding:6px;border-bottom:1px solid var(--border)">${weekCounts[wIdx][p]||0}</td>`;
-             });
-             html += `</tr>`;
+      groupMembers.forEach(m => {
+        html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+          <td style="padding:10px; text-align:right; font-weight:600">${m}</td>`;
+        
+        Object.keys(weeks).sort().forEach(w => {
+           html += `<td style="padding:10px; opacity:0.8">${weeks[w]?.[m] || 0}</td>`;
         });
         
-        html += `<tr style="font-weight:bold;background:var(--chip-bg)"><td style="padding:6px">סה״כ שישי</td>`;
-        groupMembers.forEach(p => {
-            html += `<td style="text-align:center;padding:6px">${fridayCounts[p]||0}</td>`;
-        });
-        html += `</tr></tbody></table>`;
-
-        summaryBox.innerHTML = html;
+        html += `<td style="padding:10px; font-weight:bold">${counts[m].total}</td>
+                 <td style="padding:10px; color:var(--primary); font-weight:bold">${counts[m].fri}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+      document.getElementById("summaryBox").innerHTML = html;
     }
 
-    // --- ACTIONS ---
-    saveBtn.addEventListener("click", async () => {
-        if(!activePersonName) return;
-        
-        // FIX: Ensure start date exists before trying to get monthKey
-        if(!groupSettings.startDate) {
-            toast("שגיאה: חסר תאריך התחלה. נסה לרענן.", "bad");
-            return;
-        }
+    // --- BUTTONS & MODALS ---
 
-        const start = groupSettings.startDate;
-        const monthKey = monthKeyFrom(start);
-        
-        const batch = writeBatch(db);
-        let count = 0;
+    document.getElementById("saveBtn").onclick = async () => {
+       if(!currentUser) return toast("לא מחובר", "danger");
+       const mKey = monthKeyFrom(groupSettings.startDate);
+       const batch = writeBatch(db);
+       let changes = 0;
+       
+       for(const [k, v] of Object.entries(state)) {
+         if(v[currentUser.name] !== undefined) {
+           const ref = doc(db, "groups", currentGroup, "constraints", mKey, "days", k);
+           batch.set(ref, {[currentUser.name]: v[currentUser.name]}, {merge:true});
+           changes++;
+         }
+       }
+       if(changes) {
+         await batch.commit();
+         toast("נשמר בהצלחה!");
+       } else {
+         toast("לא בוצעו שינויים", "warning");
+       }
+    };
 
-        for(const [dateKey, rowData] of Object.entries(state)) {
-            if(rowData[activePersonName] !== undefined) {
-                const docRef = doc(db, "groups", currentGroup, "constraints", monthKey, "days", dateKey);
-                batch.set(docRef, { [activePersonName]: rowData[activePersonName] }, { merge: true });
-                count++;
-            }
-        }
+    document.getElementById("resetMineBtn").onclick = () => {
+      if(confirm("לנקות את הבחירה שלך?")) {
+        for(let k in state) if(state[k][currentUser.name]) delete state[k][currentUser.name];
+        renderApp();
+      }
+    };
 
-        if(count > 0) {
-            try {
-                await batch.commit();
-                toast("השינויים נשמרו בהצלחה", "ok");
-            } catch(e) {
-                console.error(e);
-                toast("שגיאה בשמירה - בדוק הרשאות", "bad");
-            }
-        } else {
-            toast("אין שינויים לשמירה", "warn");
-        }
-    });
+    // Export CSV
+    document.getElementById("exportBtn").onclick = () => {
+       const start = groupSettings.startDate;
+       const end = addDays(start, (groupSettings.weeks*7)-1);
+       const pack = computeSchedule(start, end);
+       
+       let csv = "\uFEFFתאריך,יום,משמרת,משובץ\n";
+       let curr = new Date(start);
+       while(curr <= end) {
+         const day = curr.getDay();
+         if(day !== 6) {
+           const k = fmtKey(curr);
+           const shift = day===5 ? "בוקר (08-14)" : "ערב (16-22)";
+           csv += `${fmtShow(curr)},${hebDaysLong[day]},${shift},${pack.assign[k]||''}\n`;
+         }
+         curr = addDays(curr, 1);
+       }
+       
+       const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+       const url = URL.createObjectURL(blob);
+       const a = document.createElement('a');
+       a.href = url; a.download = `schedule_${currentGroup}.csv`;
+       a.click();
+    };
 
-    resetMineBtn.addEventListener("click", () => {
-        if(confirm("זה ינקה את כל הסימונים שלך מהתצוגה. להמשיך?")) {
-            for(const k in state) {
-                if(state[k][activePersonName]) delete state[k][activePersonName];
-            }
-            renderConstraintsPanel();
-            renderSchedule(computeSchedule());
-        }
-    });
-
-    exportBtn.addEventListener("click", () => {
-        const pack = computeSchedule();
-        const rows = [["תאריך", "יום", "שעה", "משובץ"]];
-        const days = rangeDays(groupSettings.startDate, calcFourWeekEnd(groupSettings.startDate));
-        
-        for(const d of days) {
-            const sh = shiftForWeekday(d.getDay());
-            if(!sh) continue;
-            const key = fmtDateKey(d);
-            rows.push([fmtDM(d), hebDaysLong[d.getDay()], sh.label, pack.assign[key] || ""]);
-        }
-        
-        const csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n");
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `schedule_${currentGroup}.csv`;
-        link.click();
-    });
-
-    // --- IDENTITY & AUTH ---
-    function showIdentityModal() {
-        const sorted = [...USERS_DB].sort((a,b) => a.group.localeCompare(b.group));
-        identitySelect.innerHTML = `<option value="">בחר משתמש...</option>` + 
-            sorted.map(u => `<option value="${u.id}">${u.name} (${u.group})</option>`).join("");
-            
-        identityBackdrop.style.display = "flex";
+    // Identity
+    function showIdentity() {
+      const sel = document.getElementById("identitySelect");
+      sel.innerHTML = `<option value="">בחר...</option>` + 
+        [...USERS_DB].sort((a,b)=>a.group.localeCompare(b.group)).map(u => 
+        `<option value="${u.id}">${u.name} (${u.group})</option>`).join("");
+      document.getElementById("identityBackdrop").style.display = "flex";
     }
 
-    identityStartBtn.addEventListener("click", async () => {
-        const uid = identitySelect.value;
-        if(!uid) return;
-        const user = USERS_DB.find(u => u.id === uid);
-        if(user) {
-            localStorage.setItem("scheduler_uid", uid);
-            await loginUser(user);
-            identityBackdrop.style.display = "none";
-        }
-    });
+    document.getElementById("identityStartBtn").onclick = () => {
+      const uid = document.getElementById("identitySelect").value;
+      if(uid) {
+         const u = USERS_DB.find(x=>x.id===uid);
+         localStorage.setItem("scheduler_uid", uid);
+         loginUser(u);
+         document.getElementById("identityBackdrop").style.display = "none";
+      }
+    };
 
-    async function loginUser(user) {
-        currentUser = user;
-        activePersonName = user.name;
-        whoamiEl.textContent = `${user.name} (${user.group})`;
-        
-        if(user.group !== currentGroup) {
-            switchGroup(user.group);
-        } else {
-            checkAdminAccess();
-            renderConstraintsPanel(); 
+    function loginUser(u) {
+      currentUser = u;
+      const badge = document.getElementById("whoami");
+      badge.innerHTML = `<div class="avatar">${u.name[0]}</div><span>${u.name}</span>`;
+      
+      if(u.group !== currentGroup) switchGroup(u.group);
+      else { renderTabsState(); loadGroup(); }
+      
+      badge.onclick = () => {
+        if(confirm("להתנתק?")) {
+          localStorage.removeItem("scheduler_uid");
+          location.reload();
         }
-
-        if(!auth.currentUser) {
-            await signInAnonymously(auth);
-        }
+      };
     }
 
-    whoamiEl.addEventListener("click", () => {
-        if(confirm("להתנתק ולהחליף משתמש?")) {
-            localStorage.removeItem("scheduler_uid");
-            location.reload();
-        }
-    });
+    // Admin
+    document.getElementById("adminBtn").onclick = () => {
+       document.getElementById("adminGroupName").innerText = currentGroup;
+       document.getElementById("dateInput").value = fmtKey(groupSettings.startDate);
+       document.getElementById("durationSelect").value = groupSettings.weeks;
+       document.getElementById("lockInput").value = groupSettings.lockedUntil ? fmtKey(groupSettings.lockedUntil) : "";
+       document.getElementById("adminBackdrop").style.display = "flex";
+    };
 
-    // --- ADMIN ---
-    adminBtn.addEventListener("click", () => {
-        document.getElementById("adminGroupName").textContent = currentGroup;
-        if(groupSettings.startDate) dateInput.value = fmtDateKey(groupSettings.startDate);
-        if(groupSettings.lockedUntil) lockInput.value = fmtDateKey(groupSettings.lockedUntil);
-        adminBackdrop.style.display = "flex";
-    });
+    document.getElementById("adminCancelBtn").onclick = () => 
+       document.getElementById("adminBackdrop").style.display = "none";
+
+    document.getElementById("adminSaveBtn").onclick = async () => {
+       const start = document.getElementById("dateInput").value;
+       const w = document.getElementById("durationSelect").value;
+       const lock = document.getElementById("lockInput").value;
+       
+       if(!start) return toast("חובה לבחור תאריך", "danger");
+       
+       await setDoc(doc(db, "groups", currentGroup), {
+         startDate: start,
+         weeks: Number(w),
+         lockedUntil: lock || ""
+       }, {merge:true});
+       
+       document.getElementById("adminBackdrop").style.display = "none";
+       toast("הגדרות נשמרו!");
+    };
     
-    adminCancelBtn.addEventListener("click", () => adminBackdrop.style.display = "none");
-    
-    adminSaveBtn.addEventListener("click", async () => {
-        const newStart = dateInput.value;
-        const newLock = lockInput.value;
-        if(!newStart) { toast("חובה לבחור תאריך התחלה", "warn"); return; }
-        
-        await setDoc(doc(db, "groups", currentGroup), {
-            startDate: newStart,
-            lockedUntil: newLock || ""
-        }, { merge: true });
-        
-        toast("הגדרות נשמרו", "ok");
-        adminBackdrop.style.display = "none";
-    });
+    document.getElementById("adminResetBtn").onclick = async () => {
+       if(confirm("פעולה זו תמחק את כל האילוצים לחודש זה. בטוח?")) {
+         const mKey = monthKeyFrom(groupSettings.startDate);
+         const q = query(collection(db, "groups", currentGroup, "constraints", mKey, "days"));
+         const snap = await getDocs(q);
+         const batch = writeBatch(db);
+         snap.forEach(d => batch.delete(d.ref));
+         await batch.commit();
+         toast("הנתונים אופסו");
+         document.getElementById("adminBackdrop").style.display = "none";
+       }
+    };
 
-    adminResetBtn.addEventListener("click", async () => {
-        if(confirm(`איפוס אילוצים ל-${currentGroup} לחודש זה. בטוח?`)) {
-             const start = groupSettings.startDate;
-             const monthKey = monthKeyFrom(start);
-             const q = query(collection(db, "groups", currentGroup, "constraints", monthKey, "days"));
-             const snap = await getDocs(q);
-             
-             const batch = writeBatch(db);
-             snap.forEach(d => batch.delete(d.ref));
-             await batch.commit();
-             toast("הטבלה אופסה", "ok");
-             adminBackdrop.style.display = "none";
-        }
-    });
+    // Init
+    init();
 
-    // --- BOOTSTRAP ---
-    (async function init() {
-        renderTabs();
-        const savedUid = localStorage.getItem("scheduler_uid");
-        if(savedUid) {
-            const u = USERS_DB.find(x => x.id === savedUid);
-            if(u) {
-                await loginUser(u);
-            } else {
-                showIdentityModal();
-            }
-        } else {
-            showIdentityModal();
-        }
-        
-        if(!currentUser) {
-            await signInAnonymously(auth);
-            switchGroup(GROUPS[0]);
-        }
-    })();
   </script>
 </body>
 </html>
