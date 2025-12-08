@@ -6,7 +6,7 @@
   <title>מערכת שיבוצים - סדנה</title>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* --- עיצוב מקורי --- */
+    /* --- הגדרות עיצוב --- */
     :root{
       --bg:#0f172a; --card:#111827; --ink:#e5e7eb; --muted:#9aa6b2;
       --border:#273244; --accent:#38bdf8; --accent2:#22d3ee;
@@ -17,31 +17,30 @@
       --fri-bg:#0a1d2b; --fri-br:#224055; --fri-pill:#0e2a3f;
       --badge-bg:transparent;
       --title-g1: var(--accent); --title-g2: var(--accent2);
-      --toast-bg: rgba(15,23,42,.9); --toast-br:#2b3a55; --toast-ink:#e5e7eb;
-      --toast-ok:#16a34a; --toast-warn:#eab308; --toast-bad:#ef4444;
+      --toast-bg: rgba(15,23,42,.95); --toast-br:#2b3a55; --toast-ink:#e5e7eb;
     }
+    
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; overflow-x:hidden;
-      font-family:"Assistant",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans",sans-serif;
-      background:
-        radial-gradient(1200px 800px at 80% -10%, #0b1222 0%, var(--bg) 40%),
-        linear-gradient(180deg, #0b1222 0%, var(--bg) 100%);
+      font-family:"Assistant",sans-serif;
+      background: radial-gradient(1200px 800px at 80% -10%, #0b1222 0%, var(--bg) 40%), linear-gradient(180deg, #0b1222 0%, var(--bg) 100%);
       color:var(--ink); font-size:16px;
     }
     
-    .app{max-width:1600px;margin:0 auto;padding:16px}
-    header.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap; margin-bottom: 20px;}
-    .title{margin:0;font-weight:800;letter-spacing:.2px;font-size:clamp(22px,2.8vw,34px);
+    .app{max-width:1600px;margin:0 auto;padding:20px}
+    
+    /* Header & Tabs */
+    header.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap; margin-bottom: 24px;}
+    .title{margin:0;font-weight:800;font-size:32px;
       background:linear-gradient(90deg,var(--title-g1),var(--title-g2));
       -webkit-background-clip:text;background-clip:text;color:transparent}
     
-    /* Tabs Design */
-    .group-tabs { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .group-tabs { display: flex; gap: 10px; margin-top: 12px; }
     .tab-btn {
         background: var(--chip-bg); border: 1px solid var(--border); color: var(--muted);
-        padding: 6px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;
         font-family: inherit;
     }
     .tab-btn:hover { background: var(--border); color: var(--ink); }
@@ -50,115 +49,126 @@
         box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
     }
 
-    .header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:100%}
-    .badge{border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted);background:var(--badge-bg)}
-    .id-badge{border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:13px; cursor: pointer; transition: 0.2s; display:flex; align-items:center; gap:6px}
-    .id-badge:hover{background: var(--chip-bg);}
+    .header-actions{display:flex;align-items:center;gap:10px}
+    .id-badge{border:1px solid var(--border);padding:6px 14px;border-radius:99px;font-size:14px; cursor: pointer; transition: 0.2s; display:flex; align-items:center; gap:8px}
+    .id-badge:hover{background: var(--chip-bg); border-color:var(--accent);}
 
+    /* Main Grid Layout */
     .two{
       display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(0,2.2fr); /* שיניתי יחס לטובת הלוח */
-      grid-template-areas:"constraints schedule";
+      grid-template-columns: 1fr 280px; /* פאנל ימני גדול, פאנל שמאלי (אילוצים) קבוע */
       gap:24px; align-items:start;
+      grid-template-areas: "schedule constraints";
     }
     .constraints{grid-area:constraints}
     .schedule-panel{grid-area:schedule}
 
     @media (max-width: 1100px){
-      .two{grid-template-columns:1fr;grid-template-areas:"schedule" "constraints";}
-      .constraints{position:static}
-      .constraints .bd{max-height:none;overflow:visible}
+      .two{grid-template-columns:1fr; grid-template-areas:"constraints" "schedule";}
     }
 
-    .panel{background:linear-gradient(180deg,var(--card),color-mix(in oklab,var(--card) 80%,var(--bg)));
-      border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.08);overflow:hidden}
-    .panel .hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px; flex-wrap:wrap;}
-    .panel .bd{padding:16px}
-    .panel h3{margin:0;font-size:20px}
+    /* Panels */
+    .panel{background:linear-gradient(180deg,var(--card),rgba(17, 24, 39, 0.8));
+      border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2); overflow:hidden}
+    .panel .hd{padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+    .panel .bd{padding:20px}
+    .panel h3{margin:0;font-size:20px; font-weight:700}
 
-    button{cursor:pointer;border:none;border-radius:12px;padding:10px 14px;font-weight:700;color:var(--btn-ink);background:linear-gradient(90deg,var(--accent),var(--accent2)); font-family:inherit;}
+    /* Buttons */
+    button{cursor:pointer;border:none;border-radius:10px;padding:10px 16px;font-weight:700;color:var(--btn-ink);background:linear-gradient(90deg,var(--accent),var(--accent2)); font-family:inherit;}
     button.ghost{background:transparent;color:var(--ink);border:1px solid var(--border)}
     button[disabled]{opacity:.5;cursor:not-allowed}
-    
+    button:hover:not([disabled]){opacity:0.9}
+
     .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:var(--chip-bg);border:1px solid var(--border);color:var(--ink)}
-    
-    .legend{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px; margin-inline-start: auto;}
-    .dot{display:inline-block;width:12px;height:12px;border-radius:4px;border:1px solid var(--border)}
-    .dot-0{background:var(--chip-bg)}
-    .dot-1{background:#231e07;border-color:#54450a}
-    .dot-2{background:#2b0a0a;border-color:#512}
 
-    .people{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px; justify-content:center;}
-    .chip{background:var(--chip-bg);color:var(--ink);border:1px solid var(--border);border-radius:999px;padding:6px 12px; opacity: 0.6; pointer-events: none; transition:0.2s; font-size:14px;}
-    .chip.active{outline:2px solid var(--accent); opacity: 1; font-weight:700;}
+    /* Constraints Panel (Right) */
+    .legend{display:flex; justify-content:center; gap:12px; color:var(--muted); font-size:12px; margin-bottom:16px;}
+    .dot{display:inline-block;width:10px;height:10px;border-radius:50%; margin-inline-end:4px;}
+    .dot-0{background:var(--ink); opacity:0.2}
+    .dot-1{background:#fbbf24;}
+    .dot-2{background:#f87171;}
 
-    /* Days Grid for Constraints */
-    .days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-    .day-col-header{text-align:center; font-size:14px; color:var(--muted); padding-bottom:4px;}
+    .people{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; justify-content:center;}
+    .chip{background:var(--chip-bg);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:4px 12px; font-size:13px; transition:0.2s;}
+    .chip.active{border-color:var(--accent); color:var(--accent); background:rgba(56, 189, 248, 0.1); font-weight:700;}
+
+    /* Calendar Grid */
+    .days-header{display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:13px; color:var(--muted); margin-bottom:6px; font-weight:700;}
+    .days{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
     
     .day{
-        background:var(--chip-bg);border:1px solid var(--border);
-        border-radius:10px; padding:6px; text-align:center; cursor:pointer; 
-        min-height:60px; display:flex; flex-direction:column; gap:4px; justify-content:center;
-        transition:0.1s;
+        aspect-ratio: 1;
+        background:var(--chip-bg); border:1px solid var(--border);
+        border-radius:8px; text-align:center; cursor:pointer; 
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        transition:0.1s; position:relative;
     }
     .day:hover{border-color:var(--accent);}
-    .day .d1{font-size:16px; font-weight:700;}
-    .day .d2{font-size:11px;color:var(--muted)}
+    .day .d1{font-size:15px; font-weight:700;}
+    .day .d2{font-size:10px; color:var(--muted)}
     
     /* Logic Styles */
-    .day.shabbat{opacity:.2; cursor:not-allowed; border:1px dashed var(--border); background:transparent;}
+    .day.shabbat{opacity:.2; cursor:not-allowed; border:none; background:transparent;}
     .day.fri{background:var(--fri-bg); border-color:var(--fri-br);}
     
-    .day.state-1{background:var(--warn-bg); border-color:var(--warn-br); color:var(--warn-ink);}
-    .day.state-2{background:var(--bad-bg); border-color:var(--bad-br); color:var(--bad-ink);}
+    .day.state-1{background:rgba(251, 191, 36, 0.15); border-color:rgba(251, 191, 36, 0.5); color:#fbbf24;}
+    .day.state-2{background:rgba(248, 113, 113, 0.15); border-color:rgba(248, 113, 113, 0.5); color:#f87171;}
 
-    .hint{color:var(--muted);font-size:12px;margin-top:12px; text-align:center;}
-
-    /* Schedule Grid */
-    .schedule{display:grid;grid-template-columns:minmax(80px,8ch) repeat(6,minmax(0,1fr));gap:10px;align-items:stretch}
-    @media (max-width:700px){.schedule{grid-template-columns:1fr}.schedule .col-hd{display:none}}
-    .col-hd{font-size:13px;color:var(--muted);text-align:center;white-space:nowrap; margin-bottom:8px;}
-
-    .slot{background:var(--chip-bg);border:1px solid var(--border);border-radius:12px;min-height:88px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0; position:relative;}
-    .slot.fri{background:var(--fri-bg);border-color:var(--fri-br)}
-    .slot .datebox{display:flex; justify-content:space-between; align-items:baseline;}
-    .slot .datebox .d-top{font-size:15px;font-weight:700}
-    .slot .datebox .d-time{font-size:11px;color:var(--muted)}
+    /* Schedule Panel (Left) */
+    .schedule{display:grid; grid-template-columns: 80px repeat(6, 1fr); gap:12px; margin-bottom:20px;}
+    .col-hd{text-align:center; color:var(--muted); font-size:14px; margin-bottom:8px;}
     
-    .pill{display:inline-flex;align-items:center;justify-content:center; gap:6px;font-size:13px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--pill-bg);white-space:nowrap; font-weight:600;}
-    .pill.ok{background:var(--ok-bg);border-color:var(--ok-br);color:var(--ok-ink)}
-    .pill.bad{background:var(--bad-bg);border-color:var(--bad-br);color:var(--bad-ink)}
+    .row-hd{
+        display:flex; align-items:center; justify-content:center;
+        font-size:12px; color:var(--muted); writing-mode:vertical-rl; transform:rotate(180deg);
+        letter-spacing:1px;
+    }
+
+    .slot{
+        background:var(--chip-bg); border:1px solid var(--border); border-radius:12px;
+        min-height:90px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;
+        position:relative; transition:0.2s;
+    }
+    .slot.fri{background:var(--fri-bg); border-color:var(--fri-br);}
+    .slot:hover{transform:translateY(-2px); border-color:var(--accent);}
     
-    .warn-badge { position:absolute; bottom:6px; left:6px; font-size:10px; color:var(--warn-ink); background:var(--warn-bg); padding:2px 6px; border-radius:4px; }
-
-    .constraints{align-self:start; position:sticky; top:20px}
-
-    /* Modals */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9999}
-    .modal{width:min(500px,92vw);background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.5);padding:24px}
-    .modal h2{margin:0 0 12px 0; color:var(--accent)}
-    .row{margin-top:16px}
-    .row label{display:block; font-size:14px; color:var(--muted); margin-bottom:6px;}
-    .select,.date{background:var(--bg);color:var(--ink);border:1px solid var(--border);padding:12px;border-radius:10px;width:100%;font-size:16px; font-family:inherit;}
-    .modal .actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
-
-    .admin-bar{position:fixed;left:12px;top:12px;z-index:10000;}
+    .slot .date-info{display:flex; justify-content:space-between; align-items:center; font-size:13px; margin-bottom:6px;}
+    .slot .date-info .num{font-weight:700; font-size:16px;}
+    .slot .time{font-size:11px; color:var(--muted);}
     
+    .assignee{
+        text-align:center; padding:6px; border-radius:8px; font-size:14px; font-weight:700;
+        background:var(--bg); border:1px dashed var(--border); color:var(--muted);
+    }
+    .assignee.filled{background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16, 185, 129, 0.3);}
+    
+    .warn-badge { position:absolute; bottom:6px; left:6px; font-size:10px; display:flex; gap:2px; }
+
+    /* Utilities */
+    .badge{border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--muted);}
+    .hidden { display: none !important; }
     .loading-overlay {
         position: absolute; inset: 0; background: var(--bg); opacity: 0.9; 
-        display: flex; align-items: center; justify-content: center; z-index: 50; flex-direction: column; gap: 10px;
+        display: flex; flex-direction:column; align-items: center; justify-content: center; z-index: 50;
     }
-    .hidden { display: none !important; }
     
-    .toast-wrap{position:fixed;left:50%;transform:translateX(-50%);bottom:30px;z-index:10050;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-    .toast{pointer-events:auto;background:var(--card);border:1px solid var(--accent);color:var(--ink);padding:12px 20px;border-radius:99px;box-shadow:0 10px 40px rgba(0,0,0,.5); display:flex;align-items:center;gap:10px}
+    /* Modals */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9999}
+    .modal{width:min(450px,90vw);background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,.5);padding:30px}
+    .modal h2{margin:0 0 16px 0; color:var(--accent)}
+    .field{margin-bottom:16px;}
+    .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
+    input, select{width:100%; background:var(--bg); color:white; border:1px solid var(--border); padding:10px; border-radius:8px; font-size:16px; font-family:inherit;}
+    
+    .toast-wrap{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:10000}
+    .toast{background:#1e293b; color:#fff; padding:10px 20px; border-radius:30px; border:1px solid var(--accent); box-shadow:0 10px 30px rgba(0,0,0,0.4); display:flex; align-items:center; gap:10px;}
   </style>
 </head>
 <body>
 
   <!-- Admin Trigger -->
-  <div class="admin-bar">
+  <div style="position:fixed; left:20px; top:20px; z-index:100;">
     <button id="adminBtn" class="icon-btn hidden" title="ניהול">⚙️</button>
   </div>
 
@@ -166,24 +176,22 @@
     <header class="header">
       <div>
         <h1 class="title">מערכת שיבוצים - סדנה</h1>
-        <div class="group-tabs" id="groupTabs">
-           <!-- Tabs Injected Here -->
-        </div>
+        <div class="group-tabs" id="groupTabs"></div>
       </div>
       <div class="header-actions">
         <div id="whoami" class="id-badge">
           <span>👋</span>
-          <span id="whoamiName">לא מחובר</span>
+          <span id="whoamiName">אורח</span>
         </div>
       </div>
     </header>
 
     <main class="two">
       
-      <!-- SCHEDULE (Left) -->
-      <section class="panel schedule-panel" style="position:relative; min-height:400px">
+      <!-- SCHEDULE (Main Panel) -->
+      <section class="panel schedule-panel" style="position:relative; min-height:500px">
         <div id="loadingSchedule" class="loading-overlay hidden">
-            <span>טוען נתונים...</span>
+            <span>טוען לוח...</span>
         </div>
         
         <div class="hd">
@@ -196,41 +204,39 @@
         <div class="bd">
           <div id="scheduleGrid" class="schedule"></div>
           
-          <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border)">
-             <h4 style="margin:0 0 10px 0; color:var(--muted)">סיכום משמרות</h4>
+          <div style="margin-top:30px; padding-top:20px; border-top:1px solid var(--border)">
+             <h4 style="margin:0 0 16px 0; color:var(--muted); font-size:16px">📊 סיכום משמרות</h4>
              <div id="summaryBox" style="overflow-x:auto"></div>
           </div>
         </div>
       </section>
 
-      <!-- CONSTRAINTS (Right) -->
+      <!-- CONSTRAINTS (Side Panel) -->
       <section class="panel constraints">
         <div class="hd">
           <h3>אילוצים</h3>
           <div class="legend">
-            <span class="dot dot-0"></span> זמין
-            <span class="dot dot-1"></span> מעדיף שלא
-            <span class="dot dot-2"></span> לא זמין
+            <div><span class="dot dot-0"></span>זמין</div>
+            <div><span class="dot dot-1"></span>מעדיף שלא</div>
+            <div><span class="dot dot-2"></span>לא</div>
           </div>
         </div>
         <div class="bd">
           <div id="peopleChips" class="people"></div>
           
-          <!-- Days Header -->
-          <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:6px">
-             <div class="day-col-header">א׳</div><div class="day-col-header">ב׳</div>
-             <div class="day-col-header">ג׳</div><div class="day-col-header">ד׳</div>
-             <div class="day-col-header">ה׳</div><div class="day-col-header">ו׳</div>
-             <div class="day-col-header" style="color:#f87171">ש׳</div>
+          <!-- Days Header (Israeli Week) -->
+          <div class="days-header">
+             <div>א׳</div><div>ב׳</div><div>ג׳</div><div>ד׳</div>
+             <div>ה׳</div><div>ו׳</div><div style="color:#f87171">ש׳</div>
           </div>
           
           <div id="daysGrid" class="days"></div>
           
-          <p class="hint">טפיחה על יום משנה מצב. הנתונים נשמרים בענן.</p>
+          <p class="hint" style="margin-bottom:20px">בחר את הימים שבהם אינך יכול/ה להגיע</p>
           
-          <div style="display:flex;gap:10px;margin-top:20px">
-            <button id="saveBtn" style="flex:1">שמור שינויים</button>
-            <button id="resetMineBtn" class="ghost">אפס בחירה</button>
+          <div style="display:flex;gap:10px;">
+            <button id="saveBtn" style="flex:1">שמור</button>
+            <button id="resetMineBtn" class="ghost">נקה הכל</button>
           </div>
         </div>
       </section>
@@ -245,29 +251,27 @@
   <div id="identityBackdrop" class="modal-backdrop">
     <div class="modal">
       <h2>היי, מי את/ה?</h2>
-      <p>בחר את השם שלך כדי להתחבר למערכת.</p>
-      <div class="row">
-        <select id="identitySelect" class="select"><option value="">טוען רשימה...</option></select>
+      <div class="field">
+        <label>בחר משתמש להתחברות</label>
+        <select id="identitySelect"><option value="">טוען...</option></select>
       </div>
-      <div class="actions">
-        <button id="identityStartBtn" style="width:100%">התחבר</button>
-      </div>
+      <button id="identityStartBtn" style="width:100%">התחבר</button>
     </div>
   </div>
 
   <!-- Admin Modal -->
   <div id="adminBackdrop" class="modal-backdrop">
     <div class="modal">
-      <h2>הגדרות מנהל: <span id="adminGroupName" style="color:var(--accent)"></span></h2>
+      <h2>הגדרות ניהול: <span id="adminGroupName" style="color:var(--accent)"></span></h2>
       
-      <div class="row">
-        <label>תאריך התחלה לשיבוץ</label>
-        <input id="dateInput" class="date" type="date" />
+      <div class="field">
+        <label>תאריך התחלה (יום ראשון)</label>
+        <input id="dateInput" type="date" />
       </div>
       
-      <div class="row">
-        <label>משך זמן (מספר שבועות)</label>
-        <select id="durationSelect" class="select">
+      <div class="field">
+        <label>משך זמן התצוגה</label>
+        <select id="durationSelect">
            <option value="1">שבוע אחד</option>
            <option value="2">שבועיים</option>
            <option value="3">3 שבועות</option>
@@ -275,18 +279,18 @@
         </select>
       </div>
 
-      <div class="row">
-        <label>נעול לעריכה עד (תאריך)</label>
-        <input id="lockInput" class="date" type="date" />
+      <div class="field">
+        <label>נעול לעריכה עד (אופציונלי)</label>
+        <input id="lockInput" type="date" />
       </div>
 
-      <div class="row" style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border)">
-        <button id="adminResetBtn" class="ghost" style="color:#fca5a5; border-color:#7f1d1d; width:100%">⚠️ איפוס כל האילוצים לטווח זה</button>
-      </div>
+      <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
       
-      <div class="actions">
-        <button id="adminCancelBtn" class="ghost">סגור</button>
-        <button id="adminSaveBtn">שמור הגדרות</button>
+      <button id="adminResetBtn" class="ghost" style="color:#fca5a5; border-color:#7f1d1d; width:100%; margin-bottom:10px">⚠️ איפוס כל האילוצים לטווח זה</button>
+      
+      <div style="display:flex; gap:10px; margin-top:20px">
+        <button id="adminCancelBtn" class="ghost" style="flex:1">ביטול</button>
+        <button id="adminSaveBtn" style="flex:1">שמור הגדרות</button>
       </div>
     </div>
   </div>
@@ -314,7 +318,6 @@
 
     const GROUPS = ["מדפסות", "תפירה", "מתכת", "עיבוד שבבים", "עץ"];
     
-    // רשימת משתמשים - ניתן להוסיף/לשנות כאן
     const USERS_DB = [
         {id:"u1", name:"נבו", group:"מדפסות", role:"admin"},
         {id:"u2", name:"נטע", group:"מדפסות", role:"user"},
@@ -339,12 +342,33 @@
     let unsubSettings = null;
     let unsubConstraints = null;
 
-    // Utils
+    // --- ISRAELI DATE UTILS ---
+    // Ensuring everything works Sunday to Saturday, DD/MM/YYYY
     const startOfDay = d => { const c=new Date(d); c.setHours(0,0,0,0); return c; };
     const addDays = (d,n) => new Date(startOfDay(d).getTime() + n*MS_DAY);
-    const prevSunday = d => { let x=startOfDay(d); while(x.getDay()!==0) x=addDays(x,-1); return x; };
-    const fmtKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const fmtShow = d => `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`;
+    
+    // Get the previous Sunday (or today if it is Sunday)
+    const prevSunday = d => { 
+        let t = new Date(d); 
+        t.setDate(t.getDate() - t.getDay()); 
+        return startOfDay(t);
+    };
+    
+    // Formatting: YYYY-MM-DD for DB keys
+    const fmtKey = d => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    };
+
+    // Formatting: DD.MM for Display
+    const fmtShow = d => {
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${day}.${m}`;
+    };
+
     const monthKeyFrom = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
     
     function toast(msg, type="ok") {
@@ -398,6 +422,7 @@
             // Start Date
             if(d.startDate) {
                 const p = d.startDate.split('-').map(Number);
+                // JS Month is 0-indexed
                 groupSettings.startDate = startOfDay(new Date(p[0], p[1]-1, p[2]));
             } else groupSettings.startDate = startOfDay(new Date());
 
@@ -427,9 +452,11 @@
     }
 
     function renderApp() {
-        const start = groupSettings.startDate;
-        // Total range based on weeks setting
-        const end = addDays(start, (groupSettings.weeks * 7) - 1);
+        // Always snap start date to Sunday for display logic
+        const start = prevSunday(groupSettings.startDate);
+        const weeksToShow = groupSettings.weeks;
+        const totalDays = weeksToShow * 7;
+        const end = addDays(start, totalDays - 1);
 
         // Header
         document.getElementById("dateRangeBadge").textContent = `${fmtShow(start)} – ${fmtShow(end)}`;
@@ -448,31 +475,23 @@
             `<div class="chip ${p === currentUser?.name ? 'active' : ''}">${p}</div>`
         ).join("");
 
-        const gridStart = prevSunday(start);
-        // Ensure grid covers enough weeks to show the end date
-        const weeksToShow = Math.ceil((end - gridStart + 1) / (7 * MS_DAY));
-        const gridEnd = addDays(gridStart, (weeksToShow * 7) - 1);
-        
+        // Render Constraint Days (Sunday to Saturday)
         let html = "";
-        let curr = new Date(gridStart);
+        let curr = new Date(start);
         
-        while(curr <= gridEnd) {
+        while(curr <= end) {
             const k = fmtKey(curr);
-            const day = curr.getDay();
-            const inRange = curr >= start && curr <= end;
+            const day = curr.getDay(); // 0=Sun, 6=Sat
             const val = (state[k] && currentUser) ? (state[k][currentUser.name] || 0) : 0;
             
             let classes = "day";
-            if(day === 6) classes += " shabbat"; // Saturday
-            else if(day === 5) classes += " fri"; // Friday
+            if(day === 6) classes += " shabbat"; 
+            else if(day === 5) classes += " fri"; 
             
             if(val > 0) classes += ` state-${val}`;
             
-            // Visual style for disabled/out-of-range
-            const style = (!inRange) ? 'opacity:0.3; pointer-events:none' : '';
-
             html += `
-                <div class="${classes}" style="${style}" onclick="toggleDay('${k}', ${day})">
+                <div class="${classes}" onclick="toggleDay('${k}', ${day})">
                     <div class="d1">${curr.getDate()}</div>
                     <div class="d2">${curr.getMonth()+1}</div>
                 </div>
@@ -505,7 +524,7 @@
         renderApp(); // Re-render locally
     };
 
-    // --- ALGORITHM (Logic from Original) ---
+    // --- ALGORITHM (Smart Assign) ---
     function computeSchedule(start, end) {
         const assign = {};
         const counts = {}; groupMembers.forEach(m => counts[m] = { total: 0, fri: 0 });
@@ -519,7 +538,7 @@
             if(d.getDay() === 6) return; // Skip Shabbat
 
             const k = fmtKey(d);
-            const wIdx = Math.floor((d - prevSunday(start)) / (7 * MS_DAY));
+            const wIdx = Math.floor((d - start) / (7 * MS_DAY));
             if(!weeks[wIdx]) weeks[wIdx] = {};
 
             // 1. Filter Valid Candidates (Not Red)
@@ -550,29 +569,23 @@
 
     function renderScheduleGrid(pack, start, end) {
         const { assign } = pack;
+        // Israeli Headers: Sun-Fri
         let html = `<div class="col-hd"></div>
                     <div class="col-hd">א׳</div><div class="col-hd">ב׳</div><div class="col-hd">ג׳</div>
                     <div class="col-hd">ד׳</div><div class="col-hd">ה׳</div><div class="col-hd">ו׳</div>`;
         
-        let weekStart = prevSunday(start);
-        const finalDate = addDays(start, (groupSettings.weeks * 7) - 1);
+        let weekStart = new Date(start);
 
-        while(weekStart <= finalDate) {
+        while(weekStart <= end) {
             const weekEnd = addDays(weekStart, 6);
-            html += `<div style="display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);white-space:nowrap;writing-mode:vertical-rl;transform:rotate(180deg)">
+            html += `<div class="row-hd">
                         ${fmtShow(weekStart)} - ${fmtShow(weekEnd)}
                      </div>`;
             
+            // Loop 0 (Sun) to 5 (Fri) - 6 columns
             for(let i=0; i<6; i++) {
                 const cur = addDays(weekStart, i);
                 const k = fmtKey(cur);
-                const inRange = cur >= start && cur <= end;
-
-                if(!inRange) {
-                    html += `<div class="slot" style="opacity:0.2; border:none"></div>`;
-                    continue;
-                }
-
                 const isFri = (i===5);
                 const shiftTime = isFri ? "08:00-14:00" : "16:00-22:00";
                 const winner = assign[k];
@@ -587,10 +600,10 @@
                 html += `
                     <div class="slot ${isFri?'fri':''}">
                         <div class="datebox">
-                            <div class="d-top">${hebDaysLong[i]} ${cur.getDate()}</div>
+                            <div class="d-top">${cur.getDate()}.${cur.getMonth()+1}</div>
                             <div class="d-time">${shiftTime}</div>
                         </div>
-                        <div class="pill ${winner?'ok':'bad'}" style="margin-top:auto">
+                        <div class="assignee ${winner?'filled':''}">
                             ${winner || 'ריק'}
                         </div>
                         ${warnBadge}
@@ -606,21 +619,21 @@
         const { counts, weeks } = pack;
         let html = `<table style="width:100%; border-collapse:collapse; font-size:14px; text-align:center">
             <thead><tr style="border-bottom:1px solid var(--border); color:var(--muted)">
-            <th style="padding:8px; text-align:right">שם</th>`;
+            <th style="padding:10px; text-align:right">שם</th>`;
         
-        Object.keys(weeks).sort().forEach((w,i) => html += `<th style="padding:8px">שבוע ${i+1}</th>`);
-        html += `<th style="padding:8px; color:var(--ink)">סה״כ</th><th style="padding:8px; color:var(--accent)">שישי</th></tr></thead><tbody>`;
+        Object.keys(weeks).sort().forEach((w,i) => html += `<th style="padding:10px">שבוע ${i+1}</th>`);
+        html += `<th style="padding:10px; color:var(--ink)">סה״כ</th><th style="padding:10px; color:var(--accent)">שישי</th></tr></thead><tbody>`;
 
         groupMembers.forEach(m => {
             html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
-                <td style="padding:8px; text-align:right; font-weight:600">${m}</td>`;
+                <td style="padding:10px; text-align:right; font-weight:600">${m}</td>`;
             
             Object.keys(weeks).sort().forEach(w => {
-                html += `<td style="padding:8px; opacity:0.7">${weeks[w]?.[m] || 0}</td>`;
+                html += `<td style="padding:10px; opacity:0.7">${weeks[w]?.[m] || 0}</td>`;
             });
 
-            html += `<td style="padding:8px; font-weight:bold">${counts[m].total}</td>
-                     <td style="padding:8px; color:var(--accent); font-weight:bold">${counts[m].fri}</td></tr>`;
+            html += `<td style="padding:10px; font-weight:bold">${counts[m].total}</td>
+                     <td style="padding:10px; color:var(--accent); font-weight:bold">${counts[m].fri}</td></tr>`;
         });
         html += `</tbody></table>`;
         document.getElementById("summaryBox").innerHTML = html;
@@ -652,7 +665,7 @@
     };
 
     document.getElementById("exportBtn").onclick = () => {
-        const start = groupSettings.startDate;
+        const start = prevSunday(groupSettings.startDate);
         const end = addDays(start, (groupSettings.weeks*7)-1);
         const pack = computeSchedule(start, end);
         
