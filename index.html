@@ -93,8 +93,7 @@
     button.ghost{background:transparent;color:var(--ink);border:1px solid var(--border)}
     button.secondary{background:var(--chip-bg);color:var(--ink);border:1px solid var(--border);height:48px}
     button[disabled]{opacity:.5;cursor:not-allowed}
-    .vsep{width:1px;height:34px;background:var(--border);border-radius:1px;margin-inline:8px}
-
+    
     .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:var(--chip-bg);border:1px solid var(--border);color:var(--ink)}
     .icon-btn svg{width:26px;height:26px}
 
@@ -114,7 +113,7 @@
     .day{background:var(--chip-bg);border:1px dashed var(--border);border-radius:12px;padding:10px;text-align:center;cursor:pointer;min-height:64px;display:flex;flex-direction:column;gap:6px;justify-content:center}
     .day .d1{font-size:15px;}
     .day .d2{font-size:12px;color:var(--muted)}
-    .day.shabbat{opacity:.35;cursor:not-allowed}
+    .day.shabbat{opacity:.35;cursor:not-allowed; background: var(--bg); border:none;}
     .day.fri.state-0{background:var(--fri-bg);border-color:var(--fri-br)}
     .day.state-1{background:var(--warn-bg);border:1px solid var(--warn-br)}
     .day.state-2{background:var(--bad-bg);border:1px solid var(--bad-br)}
@@ -160,8 +159,8 @@
     .toast .btn{background:transparent;border:1px solid var(--border);color:var(--ink);border-radius:999px;padding:6px 10px;cursor:pointer}
     
     .loading-overlay {
-        position: absolute; inset: 0; background: var(--bg); opacity: 0.8; 
-        display: flex; align-items: center; justify-content: center; z-index: 50;
+        position: absolute; inset: 0; background: var(--bg); opacity: 0.9; 
+        display: flex; align-items: center; justify-content: center; z-index: 50; flex-direction: column; gap: 10px;
     }
     .hidden { display: none !important; }
   </style>
@@ -196,7 +195,10 @@
     <main class="two">
       <!-- schedule -->
       <section class="panel schedule-panel" style="position:relative">
-        <div id="loadingSchedule" class="loading-overlay hidden">טוען נתונים...</div>
+        <div id="loadingSchedule" class="loading-overlay hidden">
+            <span>טוען נתונים...</span>
+            <span style="font-size:12px;color:var(--muted)">אם זה לוקח זמן, נסה לרענן</span>
+        </div>
         <div class="hd" style="display:flex;align-items:center">
           <h3 style="margin-inline-end:12px">לוח שיבוצים</h3>
           <span id="dateRangeBadge" class="badge" style="margin-inline-end:auto"></span>
@@ -282,7 +284,6 @@
     import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, query, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
     // --- CONFIG ---
-    // ודא שזהו הקונפיג הנכון של הפרויקט הפעיל שלך!
     const firebaseConfig = {
       apiKey: "AIzaSyBiZIHRpbg0bq4VFZ2kDDXj6QeRJZpjOpg",
       authDomain: "sadna-timetable.firebaseapp.com",
@@ -300,7 +301,6 @@
     // --- DATA ---
     const GROUPS = ["מדפסות", "תפירה", "מתכת", "עיבוד שבבים", "עץ"];
     
-    // רשימת משתמשים - ניתן לערוך ולהוסיף כאן
     const USERS_DB = [
         {id:"u1", name:"נבו", group:"מדפסות", role:"admin"},
         {id:"u2", name:"נטע", group:"מדפסות", role:"user"},
@@ -322,6 +322,7 @@
     let currentUser = null; 
     let activePersonName = null; 
     let groupMembers = []; 
+    // INITIALIZE SAFELY TO AVOID NULL ERRORS
     let groupSettings = { startDate: startOfDay(new Date()), lockedUntil: null };
     
     let state = Object.create(null); 
@@ -414,7 +415,7 @@
         if(auth.currentUser) await loadGroupData();
     }
 
-    // --- LOGIC: AUTO CREATE GROUP IF MISSING ---
+    // --- DATA LOADING & AUTO-CREATION ---
     async function loadGroupData() {
         loadingSchedule.classList.remove("hidden");
         
@@ -431,12 +432,13 @@
                     startDate: fmtDateKey(new Date()),
                     lockedUntil: ""
                 });
-                return; // The snapshot will fire again immediately after creation
+                // The snapshot will trigger again automatically after creation
+                return;
             }
 
             const data = docSnap.data();
             
-            // Handle Start Date
+            // Handle Start Date with Fallback to Today
             if (data.startDate) {
                 const [y, m, d] = data.startDate.split('-').map(Number);
                 groupSettings.startDate = startOfDay(new Date(y, m - 1, d));
@@ -452,6 +454,7 @@
                 groupSettings.lockedUntil = null;
             }
 
+            // Once settings are loaded, subscribe to days
             subscribeConstraints(); 
         }, (error) => {
             console.error("Error reading group settings:", error);
@@ -463,7 +466,12 @@
         if(constraintsUnsub) constraintsUnsub();
         
         const start = groupSettings.startDate;
-        const monthKey = monthKeyFrom(start);
+        // Safety check to ensure start is valid
+        if(!start || isNaN(start.getTime())) {
+             groupSettings.startDate = startOfDay(new Date());
+        }
+
+        const monthKey = monthKeyFrom(groupSettings.startDate);
         
         constraintsUnsub = onSnapshot(collection(db, "groups", currentGroup, "constraints", monthKey, "days"), (snap) => {
             state = Object.create(null);
@@ -474,6 +482,7 @@
                 loadingSchedule.classList.add("hidden");
             } catch (e) {
                 console.error("Render Error:", e);
+                loadingSchedule.classList.add("hidden");
             }
         });
     }
@@ -513,8 +522,9 @@
         }
     }
 
-    // --- CONSTRAINTS PANEL ---
+    // --- CONSTRAINTS PANEL (FIXED) ---
     function renderConstraintsPanel() {
+        // Chips
         let chipsHtml = "";
         groupMembers.forEach(p => {
             const isMe = (p === activePersonName);
@@ -522,6 +532,7 @@
         });
         peopleChips.innerHTML = chipsHtml;
 
+        // Grid
         const start = groupSettings.startDate;
         const end = calcFourWeekEnd(start);
         const days = rangeDays(start, end);
@@ -547,7 +558,7 @@
     }
 
     window.toggleDay = (key, isShabbat) => {
-        if(isShabbat) return;
+        if(isShabbat) return; // Ignore clicks on Shabbat
         if(!activePersonName) { toast("עליך להתחבר כדי לערוך", "warn"); return; }
         
         const isLocked = groupSettings.lockedUntil && new Date() < groupSettings.lockedUntil;
@@ -709,6 +720,13 @@
     // --- ACTIONS ---
     saveBtn.addEventListener("click", async () => {
         if(!activePersonName) return;
+        
+        // FIX: Ensure start date exists before trying to get monthKey
+        if(!groupSettings.startDate) {
+            toast("שגיאה: חסר תאריך התחלה. נסה לרענן.", "bad");
+            return;
+        }
+
         const start = groupSettings.startDate;
         const monthKey = monthKeyFrom(start);
         
